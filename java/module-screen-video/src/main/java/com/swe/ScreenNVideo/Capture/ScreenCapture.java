@@ -1,3 +1,7 @@
+/**
+ * Contributed by Sandeep Kumar.
+ */
+
 package com.swe.ScreenNVideo.Capture;
 
 import java.awt.AWTException;
