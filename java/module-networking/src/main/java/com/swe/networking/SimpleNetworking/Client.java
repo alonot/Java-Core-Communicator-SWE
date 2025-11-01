@@ -87,11 +87,13 @@ public class Client implements IUser {
             final int port = client.port();
             try {
                 sendSocket = new Socket();
+                System.out.println("COnnecting..");
                 sendSocket.connect(new InetSocketAddress(serverIp.hostName(),
                         serverIp.port()), connectionTimeout);
                 final OutputStream output = sendSocket.getOutputStream();
                 final DataOutputStream dataOut = new DataOutputStream(output);
                 final InetAddress addr = InetAddress.getByName(ip);
+                System.out.println("Connected to " + ip + ":" + port + " ...");
                 dataOut.write(parser.createPkt(0, 0, module.ordinal(),
                         0, 0, addr, port, data));
                 System.out.println("Sent data succesfully...");
@@ -126,9 +128,9 @@ public class Client implements IUser {
     public void parsePacket(final byte[] packet) {
         final int module = parser.getModule(packet);
         final ModuleType type = moduleType.getType(module);
-        final String data = new String(parser.getPayload(packet),
-                StandardCharsets.UTF_8);
-        System.out.println("Client Data received : " + data);
+//        final String data = new String(parser.getPayload(packet),
+//                StandardCharsets.UTF_8);
+//        System.out.println("Client Data received : " + data);
         simpleNetworking.callSubscriber(parser.getPayload(packet), type);
     }
 

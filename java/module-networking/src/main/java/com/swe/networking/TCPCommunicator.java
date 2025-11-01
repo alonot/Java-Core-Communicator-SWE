@@ -39,7 +39,7 @@ public final class TCPCommunicator implements ProtocolBase {
      * The size of the buffer to read data.
      * Should be exactly the size of one chunk.
      */
-    private final Integer byteBufferSize = 1536;
+    private final Integer byteBufferSize = 5000 * 1024;
 
     // maintain list of clients and add timeouts
     /**
@@ -107,6 +107,7 @@ public final class TCPCommunicator implements ProtocolBase {
             final DataOutputStream dataOut = new DataOutputStream(output);
             dataOut.write(data);
             printIpAddr(destIp, destPort);
+//            destSocket.close();
             clientSockets.put(new ClientNode(destIp, destPort), destSocket);
         } catch (IOException ex) {
             System.out.println("Error occured while sending data.... ");

@@ -1,3 +1,7 @@
+/**
+ * Contributed by Aman Rahman Biswas.
+ */
+
 package com.swe.ScreenNVideo.Synchronizer;
 
 import com.swe.ScreenNVideo.Codec.Codec;

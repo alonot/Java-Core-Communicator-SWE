@@ -1,3 +1,7 @@
+/**
+ * Contributed by Bhupati Varun.
+ */
+
 package com.swe.ScreenNVideo.Capture;
 
 // Original imports
