@@ -25,10 +25,10 @@ public class Timer {
      */
     private final HashMap<ClientNode, Long> clientTimeouts;
 
-    /**
-     * Thread to run the timer.
-     */
-    private final Thread timerThread;
+//    /**
+//     * Thread to run the timer.
+//     */
+//    private final Thread timerThread;
 
     /**
      * Callback function to handle timed out clients.
@@ -50,8 +50,8 @@ public class Timer {
         for (ClientNode client : clients) {
             clientTimeouts.put(client, System.currentTimeMillis());
         }
-        this.timerThread = new Thread(this::start);
-        this.timerThread.start();
+//        this.timerThread = new Thread(this::start);
+//        this.timerThread.start();
     }
 
     /**
@@ -123,6 +123,6 @@ public class Timer {
      * Close the timer thread.
      */
     public void close() {
-        this.timerThread.interrupt();
+//        this.timerThread.interrupt();
     }
 }

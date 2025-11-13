@@ -1,5 +1,6 @@
 package com.swe.ScreenNVideo;
 
+import com.swe.ScreenNVideo.Capture.BackgroundCaptureManager;
 import com.swe.core.RPCinterface.AbstractRPC;
 import com.swe.ScreenNVideo.Codec.ADPCMEncoder;
 import com.swe.ScreenNVideo.Codec.Codec;
@@ -74,14 +75,19 @@ public class VideoComponents {
         return feed;
     }
 
+    private int runCount = 0;
+
     /**
      * Class conatining Components to capture feed.
      */
     private final CaptureComponents captureComponents;
 
-    VideoComponents(final int fps, final AbstractRPC rpcArg, final CaptureComponents captureComponentsArgs) {
+    private final BackgroundCaptureManager bgCapManager;
+
+    VideoComponents(final int fps, final AbstractRPC rpcArg, final CaptureComponents captureComponentsArgs, final BackgroundCaptureManager bgCapManagerArgs) {
         this.rpc = rpcArg;
         this.captureComponents = captureComponentsArgs;
+        this.bgCapManager = bgCapManagerArgs;
         final IHasher hasher = new Hasher(Utils.HASH_STRIDE);
         videoCodec = new JpegCodec();
         audioEncoder = new ADPCMEncoder();
@@ -251,12 +257,26 @@ public class VideoComponents {
         videoCodec.zigZagtime = 0;
 
         final List<CompressedPatch> patches = patchGenerator.generatePackets(newFeed, toCompress);
+        runCount ++;
 
         if (patches.isEmpty()) {
+            if (runCount > 500) {
+                System.err.println("Reinit the Video and Screen");
+                if (captureComponents.isVideoCaptureOn()) {
+                    bgCapManager.reInitVideo();
+                }
+                if (captureComponents.isScreenCaptureOn()) {
+                    bgCapManager.reInitScreen();
+                }
+                runCount = 0;
+            }
             System.out.println("Empty");
             prev = System.nanoTime();
             return null;
         }
+
+        // make it zero. This will fill up to 500 in case no diff is detected from long time
+        runCount = 0;
 
 //        System.out.println("COmpression TIme : " + (System.nanoTime() - curr1) / ((double) (Utils.MSEC_IN_NS)));
 //        System.out.println("ZigTime : " + videoCodec.zigZagtime / ((double) (Utils.MSEC_IN_NS)));
@@ -266,7 +286,6 @@ public class VideoComponents {
         // increase the feed number and update the feed
         feed = newFeed;
         videoFeedNumber++;
-
 
         final CPackets networkPackets = new CPackets(videoFeedNumber, localIp, false, toCompress, feed.length, feed[0].length, patches);
         System.out.println("Feed number : " + networkPackets.packetNumber());
@@ -290,7 +309,7 @@ public class VideoComponents {
 
         // Asynchronously send a serialized RImage to the UI so we don't block capture
         // (frame is deep-copied inside submitUIUpdate)
-//        submitUIUpdate(feed);
+        submitUIUpdate(feed);
 
         prev = System.nanoTime();
 //        System.out.println((prev - curr1) / (double) (Utils.MSEC_IN_NS));

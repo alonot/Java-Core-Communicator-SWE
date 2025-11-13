@@ -12,6 +12,8 @@ import java.awt.image.BufferedImage;
 public abstract class ICapture {
     public abstract BufferedImage capture() throws AWTException;
 
+    public abstract void reInit();
+
     /** Number of color channels in RGB. */
     private static final int CHANNELS = 3;
 

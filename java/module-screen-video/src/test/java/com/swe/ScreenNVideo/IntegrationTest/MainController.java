@@ -35,7 +35,7 @@ public class MainController {
         // Get IP address as string
         final String ipAddress = getSelfIP();
         final ClientNode deviceNode = new ClientNode(ipAddress, SERVERPORT);
-        final ClientNode serverNode = new ClientNode("10.32.1.250", SERVERPORT);
+        final ClientNode serverNode = new ClientNode("10.128.1.202", SERVERPORT);
 
         final RPC rpc = new RPC();
 
@@ -54,7 +54,8 @@ public class MainController {
         AbstractController networkingCom = Networking.getNetwork();
         networkingCom.addUser(deviceNode, serverNode); // DummyNetworking doesn't need this
 
-        screenNVideo.broadcastJoinMeeting();
+//        screenNVideo.broadcastJoinMeeting();
+        System.out.println("COnnected");
 
         final Thread screenNVideoThread = new Thread(() -> {
             try {

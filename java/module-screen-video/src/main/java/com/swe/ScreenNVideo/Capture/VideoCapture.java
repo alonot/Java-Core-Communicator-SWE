@@ -44,8 +44,6 @@ public class VideoCapture extends ICapture {
     public VideoCapture() {
         this.captureArea = new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         this.captureLocation = new Point(DEFAULT_X, DEFAULT_Y);
-
-
     }
 
     /**
@@ -148,6 +146,11 @@ public class VideoCapture extends ICapture {
             }
             return null;
         }
+    }
+
+    @Override
+    public void reInit() {
+        openWebcam();
     }
 
     /**

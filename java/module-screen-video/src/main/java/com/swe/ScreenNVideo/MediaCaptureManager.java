@@ -91,10 +91,10 @@ public class MediaCaptureManager implements CaptureManager {
         this.port = portArgs;
         this.networking = argNetworking;
         final CaptureComponents captureComponents = new CaptureComponents(networking, rpc, port);
-        videoComponent = new VideoComponents(Utils.FPS, rpc, captureComponents);
         audioPlayer = new AudioPlayer(Utils.DEFAULT_SAMPLE_RATE, Utils.DEFAULT_CHANNELS, Utils.DEFAULT_SAMPLE_SIZE);
         audioDecoder = new ADPCMDecoder();
         final BackgroundCaptureManager backgroundCaptureManager = new BackgroundCaptureManager(captureComponents);
+        videoComponent = new VideoComponents(Utils.FPS, rpc, captureComponents, backgroundCaptureManager);
 
         captureComponents.startAudioLoop();
         backgroundCaptureManager.start();
@@ -154,7 +154,7 @@ public class MediaCaptureManager implements CaptureManager {
     @Override
     public void startCapture() throws ExecutionException, InterruptedException {
 
-        // System.out.println("Starting capture");
+         System.out.println("Starting capture");
         int[][] feed = null;
         while (true) {
             final byte[] encodedPatches = videoComponent.captureScreenNVideo();

@@ -52,6 +52,14 @@ public final class BackgroundCaptureManager {
         System.out.println("Background Capture Thread started.");
     }
 
+    public void reInitVideo() {
+        videoCapture.reInit();
+    }
+
+    public void reInitScreen() {
+        screenCapture.reInit();
+    }
+
 
     /**
      * The main loop for the background capture thread.
@@ -67,7 +75,9 @@ public final class BackgroundCaptureManager {
                 if (capCom.isScreenCaptureOn()) {
                     try {
                         // Overwrite the volatile variable with the latest frame
+                        System.out.println("Capturing..");
                         capCom.setLatestScreenFrame(screenCapture.capture());
+                        System.out.println("Done Capturedd..");
                     } catch (AWTException e) {
                         System.err.println("Failed to capture screen: " + e.getMessage());
                         capCom.setLatestScreenFrame(null); // Clear frame on error

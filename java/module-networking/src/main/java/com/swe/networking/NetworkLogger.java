@@ -20,7 +20,7 @@ public class NetworkLogger {
      * @param module the name of the module
      */
     public static void printInfo(final String module, final String str) {
-//        LOGGER.log(Level.INFO, "[NETWORKING]" + module + "  " + str);
+        LOGGER.log(Level.INFO, "[NETWORKING]" + module + "  " + str);
     }
 
     /**

@@ -84,7 +84,6 @@ public class PacketGenerator {
 
                 final long currHash = hasher.hash(curr, x, y, w, h);
                 if (currHash != prevHashes[tx][ty]) {
-                    System.out.print("D");
                     final byte[] compressedString = this.compressor.encode(curr, x, y, h, w, toCompress);
                     patches.add(new CompressedPatch(x, y, w, h, compressedString));
                 }
