@@ -31,6 +31,10 @@ public final class TCPCommunicator implements ProtocolBase {
      * The selector for the sockets.
      */
     private Selector selector;
+
+    public void printKeys() {
+        selector.keys().stream().forEach(kay -> System.out.println(kay.channel()));
+    }
     /**
      * The list of all connected clients and their sockets.
      *
@@ -59,6 +63,7 @@ public final class TCPCommunicator implements ProtocolBase {
         try {
             NetworkLogger.printInfo(MODULENAME, "TCP communicator initialized...");
             selector = Selector.open();
+            System.out.println("INIT..............");
             deviceServerPort = serverPort;
             setServerPort();
         } catch (IOException ex) {
@@ -128,6 +133,7 @@ public final class TCPCommunicator implements ProtocolBase {
             try {
                 final SelectionKey key = clientSocket.keyFor(selector);
                 if (key != null) {
+                    System.out.println("Closing socket ");
                     key.cancel();
                     clientSocket.close();
                     clientSockets.remove(client);
@@ -180,6 +186,7 @@ public final class TCPCommunicator implements ProtocolBase {
      */
     public void acceptConnection(final SelectionKey key) {
         try {
+            System.out.println("Accepting conn");
             NetworkLogger.printInfo(MODULENAME, "Accepting new connection...");
             final ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
             final SocketChannel clientChannel = serverSocketChannel.accept();

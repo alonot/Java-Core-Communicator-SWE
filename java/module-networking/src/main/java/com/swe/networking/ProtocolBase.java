@@ -13,6 +13,9 @@ public interface ProtocolBase {
      */
     SocketChannel openSocket();
 
+
+    void printKeys();
+
     /**
      * To close an opened socket.
      *

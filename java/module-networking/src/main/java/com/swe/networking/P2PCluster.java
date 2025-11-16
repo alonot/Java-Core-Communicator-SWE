@@ -98,7 +98,7 @@ public class P2PCluster implements P2PUser {
             if (networkStructure.clusters().get(i).contains(client)) {
                 clusterServer = networkStructure.servers().get(i);
                 this.isServer = false;
-                user = new P2PClient(client, server);
+                user = new P2PClient(client, server, tcpCommunicator);
                 break;
             }
         }
@@ -145,6 +145,7 @@ public class P2PCluster implements P2PUser {
     public void receive() {
         while (true) {
             final byte[] packet = tcpCommunicator.receiveData();
+            System.out.println("Recieving");
             if (packet == null) {
                 continue;
             } else {
