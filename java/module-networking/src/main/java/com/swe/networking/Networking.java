@@ -69,6 +69,7 @@ public class Networking implements AbstractNetworking, AbstractController {
         parser = PacketParser.getPacketParser();
         topology = Topology.getTopology();
         sendThread = new Thread(this::start);
+        sendThread.start();
     }
 
     /**
@@ -110,8 +111,8 @@ public class Networking implements AbstractNetworking, AbstractController {
                 // long endTime = System.currentTimeMillis();
                 // System.out.println("Time to create new dest: " + (endTime - startTime) + " ms");
                 System.out.println("Destination " + newdest);
-                // topology.sendPacket(chunk, newdest);
-                priorityQueue.addPacket(chunk);
+                 topology.sendPacket(chunk, newdest);
+//                priorityQueue.addPacket(chunk);
             } catch (UnknownHostException ex) {
             }
         }
@@ -125,12 +126,15 @@ public class Networking implements AbstractNetworking, AbstractController {
             if (!priorityQueue.isEmpty()) {
                 final byte[] packet = priorityQueue.nextPacket();
                 try {
+                    System.out.println("TOok");
                     final PacketInfo pktInfo = parser.parsePacket(packet);
                     final InetAddress addr = pktInfo.getIpAddress();
+                    System.out.println("Got addr" + addr);
                     final int port = pktInfo.getPortNum();
                     final ClientNode dest = new ClientNode(addr.getHostAddress(), port);
                     topology.sendPacket(packet, dest);
                 } catch (UnknownHostException e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -180,13 +184,12 @@ public class Networking implements AbstractNetworking, AbstractController {
     @Override
     public void broadcast(final byte[] data, final int module, final int priority) {
         final ClientNode[] dest = {topology.getServer(user)};
-        final Vector<byte[]> chunks = getChunks(data, dest, module, priority, 1);
-        for (byte[] chunk : chunks) {
-            try {
-                priorityQueue.addPacket(chunk);
-            } catch (UnknownHostException ex) {
-            }
-        }
+            sendData(data, dest, module, priority);
+//        final Vector<byte[]> chunks = getChunks(data, dest, module, priority, 1);
+//        for (byte[] chunk : chunks) {
+////                System.out.println("Broadcasting "  + chunk.length);
+////                priorityQueue.addPacket(chunk);
+//        }
     }
 
     /**

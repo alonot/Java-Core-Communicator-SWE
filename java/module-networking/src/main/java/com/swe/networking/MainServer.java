@@ -42,7 +42,7 @@ public class MainServer implements P2PUser {
     /**
      * The timer object to monitor client timeouts.
      */
-    private final Timer timer;
+    private final Timer timer = null;
 
     /**
      * Variable to start the timer.
@@ -88,7 +88,7 @@ public class MainServer implements P2PUser {
         mainServerClusterIdx = 0;
         serializer = NetworkSerializer.getNetworkSerializer();
         chunkManager = ChunkManager.getChunkManager(packetHeaderSize);
-        timer = new Timer(timerTimeoutMilliSeconds, this::handleClientTimeout);
+//        timer = new Timer(timerTimeoutMilliSeconds, this::handleClientTimeout);
         NetworkLogger.printInfo("MainServer", "Listening at port:" + serverPort + " ...");
         communicator = new TCPCommunicator(serverPort);
         receiveThread = new Thread(() -> receive());

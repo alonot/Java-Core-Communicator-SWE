@@ -165,8 +165,8 @@ public final class TCPCommunicator implements ProtocolBase {
             }
             printIpAddr(destIp, destPort);
         } catch (IOException ex) {
-            // NetworkLogger.printError(MODULENAME, "Error while sending data...");
-            // NetworkLogger.printError(MODULENAME, "Error : " + ex.getMessage());
+             NetworkLogger.printError(MODULENAME, "Error while sending data...");
+             NetworkLogger.printError(MODULENAME, "Error : " + ex.getMessage());
         }
     }
 

@@ -49,7 +49,7 @@ public class P2PClient implements P2PUser {
     /**
      * alive thread manager.
      */
-    private final ScheduledExecutorService aliveScheduler;
+    private final ScheduledExecutorService aliveScheduler = null;
 
     /**
      * time interval gap to send alive packet.
@@ -85,11 +85,12 @@ public class P2PClient implements P2PUser {
         this.receiveThread = new Thread(this::receive);
         this.receiveThread.setName("P2PClient-Receive-Thread");
         this.receiveThread.start();
+        System.out.println("P2PClient");
 
         // start a scheduled ALIVE packets to the cluster server
-        this.aliveScheduler = Executors.newSingleThreadScheduledExecutor();
-        this.aliveScheduler.scheduleAtFixedRate(this::sendAlivePacket,
-                ALIVE_INTERVAL_SECONDS, ALIVE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+//        this.aliveScheduler = Executors.newSingleThreadScheduledExecutor();
+//        this.aliveScheduler.scheduleAtFixedRate(this::sendAlivePacket,
+//                ALIVE_INTERVAL_SECONDS, ALIVE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     @Override

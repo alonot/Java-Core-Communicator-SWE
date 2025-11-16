@@ -47,7 +47,7 @@ public class P2PServer implements P2PUser {
     /**
      * The thread to send ALIVE.
      */
-    private final Thread sendThread;
+    private final Thread sendThread = null;
 
     /**
      * The thread to monitor client timeouts.
@@ -97,11 +97,13 @@ public class P2PServer implements P2PUser {
         this.mainServer = mainServerAddress;
 
         this.timer = new Timer(timerTimeout, this::handleClientTimeout);
-        sendThread = new Thread(this::sendAliveToMainServer);
+//        sendThread = new Thread(this::sendAliveToMainServer);
         receiveThread = new Thread(this::receive);
 
-        sendThread.start();
+//        sendThread.start();
         receiveThread.start();
+
+        System.out.println("P2PServer");
 
         System.out.println("Created a new P2P Server at " + deviceAddress + "...");
     }
@@ -115,7 +117,7 @@ public class P2PServer implements P2PUser {
     @Override
     public void send(final byte[] data, final ClientNode[] destIp) {
         for (ClientNode dest : destIp) {
-            System.out.println("Sending data to " + dest.hostName() + ":" + dest.port());
+            System.out.println("P2PServer Sending data to " + dest.hostName() + ":" + dest.port());
             communicator.sendData(data, dest);
         }
     }
@@ -128,7 +130,7 @@ public class P2PServer implements P2PUser {
      */
     @Override
     public void send(final byte[] data, final ClientNode destIp) {
-        System.out.println("Sending data to " + destIp.hostName() + ":" + destIp.port());
+        System.out.println("P2pServer Sending data to " + destIp.hostName() + ":" + destIp.port());
         communicator.sendData(data, destIp);
     }
 
