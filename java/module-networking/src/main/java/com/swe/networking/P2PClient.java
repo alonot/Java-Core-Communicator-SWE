@@ -73,11 +73,11 @@ public class P2PClient implements P2PUser {
      * @param device The ClientNode info for this device.
      * @param server The ClientNode info for the mainServer.
      */
-    public P2PClient(final ClientNode device, final ClientNode server) {
+    public P2PClient(final ClientNode device, final ClientNode server, final ProtocolBase tcpCommunicator) {
         this.deviceAddress = device;
         this.mainServerAddress = server;
 
-        this.communicator = new TCPCommunicator(device.port());
+        this.communicator = tcpCommunicator;
         chunkManager = ChunkManager.getChunkManager(packetHeaderSize);
 
         updateClusterServer();
@@ -153,7 +153,9 @@ public class P2PClient implements P2PUser {
     public void receive() {
         while (running) {
             try {
+                System.out.println("Reading packet ...");
                 final byte[] packet = communicator.receiveData();
+                System.out.println("Got Once");
                 if (packet == null) {
                     continue;
                 }
@@ -251,8 +253,14 @@ public class P2PClient implements P2PUser {
                 break;
 
             case MODULE:
-                System.out.println("p2pclient received MODULE packet");
-                chunkManager.addChunk(packet);
+                System.out.println("MODULE packet received");
+                final int module = parser.parsePacket(packet).getModule();
+                final byte[] data = chunkManager.addChunk(packet);
+                final Networking networking = Networking.getNetwork();
+                if (data != null) {
+                    final PacketInfo destpktInfo = parser.parsePacket(data);
+                    networking.callSubscriber(module, destpktInfo.getPayload());
+                }
                 break;
 
             case CLOSE: // 111 : close the client terminate
