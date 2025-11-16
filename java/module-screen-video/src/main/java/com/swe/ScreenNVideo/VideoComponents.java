@@ -143,8 +143,8 @@ public class VideoComponents {
                 try {
                     final RImage rImage = new RImage(frame, localIp);
                     final byte[] serializedImage = rImage.serialize();
-//                    System.out.println("Time from previous send: " + (System.nanoTime() - prev)
-//                        / ((double) Utils.MSEC_IN_NS));
+                    System.out.println("Time from previous send: " + (System.nanoTime() - prev)
+                        / ((double) Utils.MSEC_IN_NS));
                     try {
                         rpc.call(Utils.UPDATE_UI, serializedImage);
                     } catch (final Exception e) {
@@ -187,6 +187,7 @@ public class VideoComponents {
         if (frame == null) {
             return;
         }
+        System.out.println("Offered");
         final boolean offered = uiQueue.offer(frame);
         if (!offered) {
             // drop the frame
@@ -245,9 +246,12 @@ public class VideoComponents {
             return null;
         }
 
-        final boolean toCompress = captureComponents.isVideoCaptureOn() && !captureComponents.isScreenCaptureOn();
-        System.out.println("Server FPS : "
-            + (int) ((double) (Utils.SEC_IN_MS) / (diff / ((double) (Utils.MSEC_IN_NS)))));
+//        submitUIUpdate(newFeed);
+
+//        final boolean toCompress = captureComponents.isVideoCaptureOn() && !captureComponents.isScreenCaptureOn();
+        final boolean toCompress = true;
+//        System.out.println("Server FPS : "
+//            + (int) ((double) (Utils.SEC_IN_MS) / (diff / ((double) (Utils.MSEC_IN_NS)))) + " " + toCompress);
 
 //        System.out.println("Time to get feed : " + (start - currTime) / ((double) (Utils.MSEC_IN_NS)));
 
@@ -270,7 +274,7 @@ public class VideoComponents {
                 }
                 runCount = 0;
             }
-            System.out.println("Empty");
+//            System.out.println("Empty");
             prev = System.nanoTime();
             return null;
         }
@@ -309,7 +313,7 @@ public class VideoComponents {
 
         // Asynchronously send a serialized RImage to the UI so we don't block capture
         // (frame is deep-copied inside submitUIUpdate)
-        submitUIUpdate(feed);
+//        submitUIUpdate(feed);
 
         prev = System.nanoTime();
 //        System.out.println((prev - curr1) / (double) (Utils.MSEC_IN_NS));

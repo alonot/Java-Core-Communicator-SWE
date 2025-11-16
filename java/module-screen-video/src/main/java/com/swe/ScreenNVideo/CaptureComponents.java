@@ -36,11 +36,11 @@ public class CaptureComponents {
     }
 
     public void setLatestScreenFrame(final BufferedImage latestScreenFrameArgs) {
-        if (latestScreenFrameArgs != null && latestScreenFrame != null && compareMatrices(Utils.convertToRGBMatrix(this.latestScreenFrame), Utils.convertToRGBMatrix(latestScreenFrameArgs))) {
-            System.err.println("Exactly Same");
-            return;
-        }
-        System.out.println("Setting");
+//        if (latestScreenFrameArgs != null && latestScreenFrame != null && compareMatrices(Utils.convertToRGBMatrix(this.latestScreenFrame), Utils.convertToRGBMatrix(latestScreenFrameArgs))) {
+//            System.err.println("Exactly Same");
+//            return;
+//        }
+//        System.out.println("Setting");
         this.latestScreenFrame = latestScreenFrameArgs;
     }
 
@@ -119,7 +119,7 @@ public class CaptureComponents {
      */
 
     CaptureComponents(final AbstractNetworking argNetworking, final AbstractRPC rpc, final int port) {
-        isScreenCaptureOn = true;
+        isScreenCaptureOn = false;
         isVideoCaptureOn = false;
         isAudioCaptureOn = false;
         this.networking = argNetworking;

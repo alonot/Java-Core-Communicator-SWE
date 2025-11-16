@@ -18,7 +18,7 @@ public final class BackgroundCaptureManager {
     /**
      * Instance for capturing the entire screen.
      */
-    private final ICapture screenCapture;
+    private ICapture screenCapture;
     /**
      * Instance for capturing a specific video region.
      */
@@ -57,7 +57,7 @@ public final class BackgroundCaptureManager {
     }
 
     public void reInitScreen() {
-        screenCapture.reInit();
+        screenCapture = new ScreenCapture();
     }
 
 
@@ -75,11 +75,13 @@ public final class BackgroundCaptureManager {
                 if (capCom.isScreenCaptureOn()) {
                     try {
                         // Overwrite the volatile variable with the latest frame
-                        System.out.println("Capturing..");
+//                        System.out.println("Capturing..");
                         capCom.setLatestScreenFrame(screenCapture.capture());
-                        System.out.println("Done Capturedd..");
+//                        System.out.println("Done Capturedd..");
                     } catch (AWTException e) {
                         System.err.println("Failed to capture screen: " + e.getMessage());
+                        Thread.sleep(500);
+                        screenCapture = new ScreenCapture();
                         capCom.setLatestScreenFrame(null); // Clear frame on error
                     }
                 } else {

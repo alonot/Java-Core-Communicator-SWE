@@ -35,7 +35,7 @@ public class MainController {
         // Get IP address as string
         final String ipAddress = getSelfIP();
         final ClientNode deviceNode = new ClientNode(ipAddress, SERVERPORT);
-        final ClientNode serverNode = new ClientNode("10.128.1.202", SERVERPORT);
+        final ClientNode serverNode = new ClientNode("10.128.4.223", SERVERPORT);
 
         final RPC rpc = new RPC();
 
