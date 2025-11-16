@@ -248,8 +248,8 @@ public class VideoComponents {
 
 //        submitUIUpdate(newFeed);
 
-//        final boolean toCompress = captureComponents.isVideoCaptureOn() && !captureComponents.isScreenCaptureOn();
-        final boolean toCompress = true;
+        final boolean toCompress = captureComponents.isVideoCaptureOn() && !captureComponents.isScreenCaptureOn();
+//        final boolean toCompress = true;
 //        System.out.println("Server FPS : "
 //            + (int) ((double) (Utils.SEC_IN_MS) / (diff / ((double) (Utils.MSEC_IN_NS)))) + " " + toCompress);
 

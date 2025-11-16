@@ -188,7 +188,7 @@ public class MediaCaptureManager implements CaptureManager {
          System.out.println("Sent to viewers " + viewers.size());
 //        CompletableFuture.runAsync(() -> {
 //        try {
-//            Thread.sleep(250);
+//            Thread.sleep(5000);
 //        } catch (InterruptedException e) {
 //            System.err.println("Error in timer");
 //            throw new RuntimeException(e);
