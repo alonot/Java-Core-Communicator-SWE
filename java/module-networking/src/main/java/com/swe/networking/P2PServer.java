@@ -117,7 +117,7 @@ public class P2PServer implements P2PUser {
     @Override
     public void send(final byte[] data, final ClientNode[] destIp) {
         for (ClientNode dest : destIp) {
-            System.out.println("P2PServer Sending data to " + dest.hostName() + ":" + dest.port());
+//            System.out.println("P2PServer Sending data to " + dest.hostName() + ":" + dest.port());
             communicator.sendData(data, dest);
         }
     }
@@ -130,7 +130,7 @@ public class P2PServer implements P2PUser {
      */
     @Override
     public void send(final byte[] data, final ClientNode destIp) {
-        System.out.println("P2pServer Sending data to " + destIp.hostName() + ":" + destIp.port());
+//        System.out.println("P2pServer Sending data to " + destIp.hostName() + ":" + destIp.port());
         communicator.sendData(data, destIp);
     }
 

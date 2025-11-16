@@ -131,7 +131,7 @@ public class MainServer implements P2PUser {
         while (true) {
             final byte[] packet = communicator.receiveData();
             if (packet != null) {
-                System.out.println("Packet " + packet.length);
+//                System.out.println("Packet " + packet.length);
                 final List<byte[]> packets = SplitPackets.getSplitPackets().split(packet);
                 for (byte[] p : packets) {
                     parsePacket(p);

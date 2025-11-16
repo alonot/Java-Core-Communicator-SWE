@@ -134,7 +134,7 @@ public class P2PCluster implements P2PUser {
      */
     @Override
     public void send(final byte[] data, final ClientNode destIp) {
-        System.out.println("P2pCluster send to " + destIp.hostName());
+//        System.out.println("P2pCluster send to " + destIp.hostName());
         this.user.send(data, destIp);
     }
 

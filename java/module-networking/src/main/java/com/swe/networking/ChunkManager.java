@@ -82,7 +82,7 @@ public class ChunkManager {
         final String msgId = String.valueOf(info.getMessageId()) + ":" + info.getIpAddress().toString();
         final int maxNumChunks = info.getChunkLength();
         final int chunkId = info.getChunkNum();
-        System.out.println("Chunk id / total chunks " + chunkId + " / " + maxNumChunks + " " + msgId);
+//        System.out.println("Chunk id / total chunks " + chunkId + " / " + maxNumChunks + " " + msgId);
         if (chunkListMap.containsKey(msgId)) {
             chunkListMap.get(msgId).add(chunk);
         } else {
@@ -92,7 +92,7 @@ public class ChunkManager {
         if (chunkListMap.get(msgId).size() == maxNumChunks) {
             final byte[] messageChunk = mergeChunks(chunkListMap.get(msgId));
             // TOD use appropriate function once the message is ready
-            System.out.println("message length: " + messageChunk.length);
+//            System.out.println("message length: " + messageChunk.length);
             messageList.add(messageChunk);
             chunkListMap.remove(msgId);
             return messageChunk;
@@ -148,14 +148,14 @@ public class ChunkManager {
 
         final byte[] data = info.getPayload();
         final int numChunks = (data.length + payloadSize - 1) / payloadSize;
-        System.out.println("chunk length " + numChunks);
+//        System.out.println("chunk length " + numChunks);
         info.setChunkLength(numChunks);
         info.setMessageId(messageId);
         messageId++;
         // reset message id to zero once it exceed limit
         for (int i = 0; i < data.length; i += payloadSize) {
             final int pSize = Math.min(payloadSize, data.length - i);
-            System.out.println("payload size " + pSize);
+//            System.out.println("payload size " + pSize);
             final byte[] payloadChunk = new byte[pSize];
             System.arraycopy(data, i, payloadChunk, 0, pSize);
             final int chunkNumber = i / payloadSize;
@@ -165,7 +165,7 @@ public class ChunkManager {
             final byte[] pkt = parser.createPkt(info);
             chunks.add(pkt);
         }
-        System.out.println("Chunk size : " + chunks.size());
+//        System.out.println("Chunk size : " + chunks.size());
         return chunks;
     }
 

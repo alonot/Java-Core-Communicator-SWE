@@ -98,7 +98,7 @@ public class P2PClient implements P2PUser {
         for (ClientNode dest : destIp) {
 
             final ClientNode sendDest = topology.getDestination(mainServerAddress, dest);
-            System.out.println("p2pclient sending data to: " + sendDest);
+//            System.out.println("p2pclient sending data to: " + sendDest);
             communicator.sendData(data, sendDest);
         }
         return;
@@ -108,7 +108,7 @@ public class P2PClient implements P2PUser {
     public void send(final byte[] data, final ClientNode destIp) {
 
         final ClientNode sendDest = topology.getDestination(mainServerAddress, destIp);
-        System.out.println("p2pclient sending data to: " + sendDest);
+//        System.out.println("p2pclient sending data to: " + sendDest);
         communicator.sendData(data, sendDest);
         return;
     }

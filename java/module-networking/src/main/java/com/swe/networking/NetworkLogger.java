@@ -21,7 +21,7 @@ public class NetworkLogger {
      */
     public static void printInfo(final String module, final String str) {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s: %5$s%n");
-        LOGGER.log(Level.INFO, "[NETWORKING]" + module + "  " + str);
+//        LOGGER.log(Level.INFO, "[NETWORKING]" + module + "  " + str);
     }
 
     /**
@@ -32,7 +32,7 @@ public class NetworkLogger {
      */
     public static void printWarning(final String module, final String str) {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s: %5$s%n");
-        LOGGER.log(Level.WARNING, "[NETWORKING]" + module + " " + str);
+//        LOGGER.log(Level.WARNING, "[NETWORKING]" + module + " " + str);
     }
 
     /**
@@ -43,7 +43,7 @@ public class NetworkLogger {
      */
     public static void printError(final String module, final String str) {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%4$s: %5$s%n");
-        LOGGER.log(Level.SEVERE, "[NETWORKING]" + module + " " + str);
+//        LOGGER.log(Level.SEVERE, "[NETWORKING]" + module + " " + str);
     }
 
 }
