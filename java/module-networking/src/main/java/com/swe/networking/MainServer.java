@@ -367,7 +367,7 @@ public class MainServer implements P2PUser {
     public void close() {
         receiveThread.interrupt();
         communicator.close();
-        timer.close();
+//        timer.close();
     }
 
     /**
