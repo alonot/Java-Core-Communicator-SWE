@@ -155,11 +155,11 @@ public final class TCPCommunicator implements ProtocolBase {
             if (clientSockets.containsKey(dest)) {
                 NetworkLogger.printInfo(MODULENAME, "Connection to " + dest + " exists already...");
                 destSocket = clientSockets.get(dest);
-                System.out.println("COnnec exists " + destSocket.socket().getRemoteSocketAddress()  + " Local " + destSocket.socket().getLocalAddress() + " " + destSocket.socket().getLocalPort());
+//                System.out.println("COnnec exists " + destSocket.socket().getRemoteSocketAddress()  + " Local " + destSocket.socket().getLocalAddress() + " " + destSocket.socket().getLocalPort());
             } else {
                 destSocket = openSocket();
                 destSocket.configureBlocking(true);
-                System.out.println("Connecting to "+ dest + " " + destIp);
+//                System.out.println("Connecting to "+ dest + " " + destIp);
                 NetworkLogger.printInfo(MODULENAME, "Client : " + dest + " ...");
                 destSocket.connect(new InetSocketAddress(destIp, destPort));
                 destSocket.configureBlocking(false);

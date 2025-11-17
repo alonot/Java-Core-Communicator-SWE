@@ -109,7 +109,7 @@ public class VideoComponents {
             return null;
         }
 
-        final boolean toCompress = captureComponents.isVideoCaptureOn() && !captureComponents.isScreenCaptureOn();
+        final boolean toCompress = true;
 
         final List<CompressedPatch> patches = patchGenerator.generateFullImage(feed, toCompress);
 
@@ -143,6 +143,10 @@ public class VideoComponents {
                 try {
                     final RImage rImage = new RImage(frame, localIp);
                     final byte[] serializedImage = rImage.serialize();
+
+                    if (serializedImage == null) {
+                        continue;
+                    }
 //                    System.out.println("Time from previous send: " + (System.nanoTime() - prev)
 //                        / ((double) Utils.MSEC_IN_NS));
                     try {
@@ -247,10 +251,10 @@ public class VideoComponents {
 
 //        submitUIUpdate(newFeed);
 
-        final boolean toCompress = captureComponents.isVideoCaptureOn() && !captureComponents.isScreenCaptureOn();
-//        final boolean toCompress = true;
-//        System.out.println("Server FPS : "
-//            + (int) ((double) (Utils.SEC_IN_MS) / (diff / ((double) (Utils.MSEC_IN_NS)))) + " " + toCompress);
+//        final boolean toCompress = captureComponents.isVideoCaptureOn() && !captureComponents.isScreenCaptureOn();
+        final boolean toCompress = true;
+        System.out.println("Server FPS : "
+            + (int) ((double) (Utils.SEC_IN_MS) / (diff / ((double) (Utils.MSEC_IN_NS)))) + " " + toCompress);
 
 //        System.out.println("Time to get feed : " + (start - currTime) / ((double) (Utils.MSEC_IN_NS)));
 

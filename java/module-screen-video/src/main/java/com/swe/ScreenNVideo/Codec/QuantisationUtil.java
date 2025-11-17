@@ -136,7 +136,7 @@ public class QuantisationUtil {
         }
 
         // Initialize the scaled tables when created
-        setCompressonResolution(90);
+        setCompressonResolution(99);
     }
 
     /**

@@ -128,8 +128,8 @@ public final class Topology implements AbstractTopology {
         final List<List<ClientNode>> clients = new ArrayList<>();
         final List<ClientNode> servers = new ArrayList<>();
         final NetworkStructure structure = new NetworkStructure(clients, servers);
-        System.out.println(clusters);
-        System.out.println(clusterServers);
+//        System.out.println(clusters);
+//        System.out.println(clusterServers);
         for (int i = 0; i < clusters.size(); i++) {
             structure.clusters().add(clusters.get(i));
             structure.servers().add(clusterServers.get(i));
@@ -158,7 +158,7 @@ public final class Topology implements AbstractTopology {
         final List<ClientNode> lastCluster = clusters.get(clusters.size() - 1);
         if (lastCluster.size() < singleClusterSize) {
             lastCluster.add(clientAddress);
-            System.out.println("Added to cluster " + (numClusters - 1) + " ...");
+//            System.out.println("Added to cluster " + (numClusters - 1) + " ...");
             return numClusters - 1;
         } else {
             final List<ClientNode> cluster = new ArrayList<>();
@@ -201,7 +201,7 @@ public final class Topology implements AbstractTopology {
             }
             clusters.remove(idx);
             clusterServers.remove(removeClient);
-            System.out.println("Removed " + removeClient + "from the server list...");
+//            System.out.println("Removed " + removeClient + "from the server list...");
             // numClusters -= 1;
         }
     }
@@ -301,7 +301,7 @@ public final class Topology implements AbstractTopology {
     public ClientNode getDestination(final ClientNode source, final ClientNode dest) {
         final int srcClusterIdx = getClusterIndex(source);
         final int destClusterIdx = getClusterIndex(dest);
-        System.out.println("Netowkr "+topology.getNetwork());
+//        System.out.println("Netowkr "+topology.getNetwork());
         if (srcClusterIdx == destClusterIdx) {
             return dest;
         } else {

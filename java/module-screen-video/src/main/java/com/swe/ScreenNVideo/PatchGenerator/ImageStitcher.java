@@ -45,6 +45,7 @@ public class ImageStitcher {
         this.canvas = initialCanvas;
         this.currentHeight = initialCanvas.length;
         this.currentWidth = initialCanvas[0].length;
+        System.out.println("Setting canvas " + currentHeight + " " + currentWidth);
     }
 
     /**
@@ -65,6 +66,7 @@ public class ImageStitcher {
         this.canvas = new int[0][0];
         this.currentHeight = 0;
         this.currentWidth = 0;
+        System.out.println("Resetting canvas " + currentHeight + " " + currentWidth);
     }
 
     /**

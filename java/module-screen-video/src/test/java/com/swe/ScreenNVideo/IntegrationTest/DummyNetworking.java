@@ -55,7 +55,7 @@ public class DummyNetworking implements AbstractNetworking {
      * Constructor with default port 9999.
      */
     public DummyNetworking() {
-        this(9999);
+        this(40000);
     }
 
     public String getSelfIP() {
@@ -177,7 +177,7 @@ public class DummyNetworking implements AbstractNetworking {
 
         for (int i = 0; i < dest.length; i++) {
             ips[i] = dest[i].hostName();
-            ports[i] = listenPort; // Use same port for all destinations
+            ports[i] = dest[i].port(); // Use same port for all destinations
         }
 
         sendData(data, ips, ports);
@@ -185,7 +185,7 @@ public class DummyNetworking implements AbstractNetworking {
 
     @Override
     public void broadcast(byte[] data, int module, int priority) {
-
+        sendData(data, new ClientNode[]{new ClientNode("10.128.2.128", 40000)},module,priority);
     }
 
     @Override

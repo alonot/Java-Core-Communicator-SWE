@@ -36,6 +36,9 @@ public class VideoCapture extends ICapture {
     private static final int DEFAULT_X = 100;
     /** Default capture settings. */
     private static final int DEFAULT_Y = 100;
+    
+    /** Check if running on macOS. */
+    private static final boolean IS_MAC = System.getProperty("os.name").toLowerCase().contains("mac");
 
     /**
      * Constructor - initializes with default screen capture area.
@@ -63,7 +66,8 @@ public class VideoCapture extends ICapture {
         try {
             this.webcam = Webcam.getDefault();
             if (this.webcam == null) {
-                throw new IllegalStateException("No webcam found.");
+                throw new IllegalStateException("No webcam found. Check camera permissions" 
+                    + (IS_MAC ? " in System Preferences > Security & Privacy > Camera" : ""));
             }
 
             // Use the captureArea set by the constructor
@@ -71,19 +75,34 @@ public class VideoCapture extends ICapture {
             // If default Robot values were used, switch to a standard webcam res
             if (resolution.width == DEFAULT_WIDTH && resolution.height == DEFAULT_HEIGHT) {
                 resolution = WebcamResolution.VGA.getSize();
-                System.out.println("Using default VGA resolution: " + resolution.width + "x" + resolution.height);
-            } else {
-                System.out.println("Using custom resolution: " + resolution.width + "x" + resolution.height);
             }
 
             this.webcam.setCustomViewSizes(new Dimension[]{resolution});
             this.webcam.setViewSize(resolution);
-            this.webcam.open();
+            
+            // Mac-specific: Use async open with wait to avoid timeout issues
+            if (IS_MAC) {
+                this.webcam.open(true); // async=true for Mac
+                // Wait for webcam to be ready (max 10 seconds)
+                int waitCount = 0;
+                while (!this.webcam.isOpen() && waitCount < 100) {
+                    Thread.sleep(100);
+                    waitCount++;
+                }
+                if (!this.webcam.isOpen()) {
+                    throw new IllegalStateException("Webcam open timeout. Check: camera permissions, "
+                        + "no other app using camera, IDE has camera access");
+                }
+            } else {
+                this.webcam.open();
+            }
 
-            System.out.println("VideoCapture initialized with webcam: " + webcam.getName());
+            System.out.println("VideoCapture initialized: " + webcam.getName());
 
         } catch (Exception e) {
             System.err.println("Error initializing Webcam: " + e.getMessage());
+            e.printStackTrace();
+            this.webcam = null;
             if (listener != null) {
                 listener.onCaptureError("Failed to initialize capture: " + e.getMessage());
             }
