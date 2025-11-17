@@ -6,6 +6,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Vector;
 
+import com.swe.core.RPCinteface.AbstractRPC;
 import com.swe.networking.ClientNode;
 import com.swe.networking.ModuleType;
 import com.swe.networking.NetworkConnectionType;
@@ -56,6 +57,9 @@ public final class SimpleNetworking
      * The variable to store chunk Manager payload size.
      */
     private final int payloadSize = 15 * 1024;
+
+    /** The variable to store the RPC instance. */
+    private AbstractRPC rpc;
 
     private SimpleNetworking() {
         chunkManager = SimpleChunkManager.getChunkManager(payloadSize);
@@ -108,6 +112,17 @@ public final class SimpleNetworking
         }
         receiveThread = new Thread(() -> receiveData());
         receiveThread.start();
+    }
+
+    /**
+     * Method to consume the RPC.
+     *
+     * @param rpcInstance the RPC to consume.
+     */
+    @Override
+    public void consumeRPC(final AbstractRPC rpcInstance) {
+        this.rpc = rpcInstance;
+        System.out.println("RPC consumed by SimpleNetworking...");
     }
 
     /**
