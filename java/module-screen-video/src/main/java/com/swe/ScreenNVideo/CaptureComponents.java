@@ -14,6 +14,7 @@ import com.swe.networking.ModuleType;
 import com.swe.networking.AbstractNetworking;
 
 import java.awt.image.BufferedImage;
+import java.util.function.BiFunction;
 
 /**
  * Class conatining Components to capture feed.
@@ -106,18 +107,20 @@ public class CaptureComponents {
      */
     private final String localIp = Utils.getSelfIP();
 
+    private final BiFunction<String, Boolean, Void> addSynchron;
+
     /**
      * Constructor for CaptureComponents.
      * @param argNetworking Networking object
      * @param rpc RPC object
      * @param port Port number
      */
-
-    CaptureComponents(final AbstractNetworking argNetworking, final AbstractRPC rpc, final int port) {
+    CaptureComponents(final AbstractNetworking argNetworking, final AbstractRPC rpc, final int port, BiFunction<String, Boolean, Void> function) {
         isScreenCaptureOn = false;
         isVideoCaptureOn = false;
         isAudioCaptureOn = false;
         this.networking = argNetworking;
+        addSynchron = function;
         scalar = new BilinearScaler();
         imageStitcher = new ImageStitcher();
         audioCapture = new AudioCapture();
@@ -250,6 +253,7 @@ public class CaptureComponents {
 
             final IPPacket subsPacket = new IPPacket(localIp, dest.reqCompression());
 
+            addSynchron.apply(dest.ip(), dest.reqCompression());
             final byte[] subscribeData = subsPacket.serialize(NetworkPacketType.SUBSCRIBE_AS_VIEWER);
             networking.sendData(subscribeData, new ClientNode[] {destNode}, ModuleType.SCREENSHARING.ordinal(), 2);
 

@@ -90,7 +90,7 @@ public class MediaCaptureManager implements CaptureManager {
         this.rpc = argRpc;
         this.port = portArgs;
         this.networking = argNetworking;
-        final CaptureComponents captureComponents = new CaptureComponents(networking, rpc, port);
+        final CaptureComponents captureComponents = new CaptureComponents(networking, rpc, port, (k,v) -> updateImage(k,v));
         audioPlayer = new AudioPlayer(Utils.DEFAULT_SAMPLE_RATE, Utils.DEFAULT_CHANNELS, Utils.DEFAULT_SAMPLE_SIZE);
         audioDecoder = new ADPCMDecoder();
         final BackgroundCaptureManager backgroundCaptureManager = new BackgroundCaptureManager(captureComponents);
@@ -117,6 +117,15 @@ public class MediaCaptureManager implements CaptureManager {
         clientHandler = new MediaCaptureManager.ClientHandler();
 
         networking.subscribe(ModuleType.SCREENSHARING.ordinal(), clientHandler);
+    }
+
+    public Void updateImage(String ip, boolean val) {
+        ImageSynchronizer imageSynchronizer = imageSynchronizers.get(ip);
+        if (imageSynchronizer == null) {
+            return null;
+        }
+        imageSynchronizer.reqCompression = val;
+        return null;
     }
 
     /**
@@ -287,7 +296,7 @@ public class MediaCaptureManager implements CaptureManager {
                         // if heap is growing too large, request a full frame to resync
                         if (imageSynchronizer.getHeap().size() >= Utils.MAX_HEAP_SIZE) {
                             System.out.println("Too Large");
-                            askForFullImage(networkPackets.ip());
+                            askForFullImage(networkPackets.ip(), imageSynchronizer.reqCompression);
                             imageSynchronizer.waitingForFullImage = true;
                             imageSynchronizer.getHeap().clear();
                             return;
@@ -326,8 +335,7 @@ public class MediaCaptureManager implements CaptureManager {
                             System.out.println(
                                 "-----------------------------=------------------------Exception " + e.getMessage());
                             e.printStackTrace();
-                            askForFullImage(networkPackets.ip());
-                            imageSynchronizer.waitingForFullImage = true;
+                            askForFullImage(networkPackets.ip(), imageSynchronizer.reqCompression);
                             imageSynchronizer.getHeap().clear();
                             return;
                         }
@@ -349,7 +357,7 @@ public class MediaCaptureManager implements CaptureManager {
                         }
                         final boolean success = res[0] == 1;
                         if (!success) {
-                            addParticipant(networkPackets.ip(), requiresCompression(networkPackets.ip()));
+                            addParticipant(networkPackets.ip(), imageSynchronizer.reqCompression);
                         }
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace(System.out);
@@ -381,17 +389,9 @@ public class MediaCaptureManager implements CaptureManager {
             }
         }
 
-        private boolean requiresCompression(final String ip) {
-            final Viewer viewer = viewers.get(ip);
-            if (viewer == null) {
-                return true;
-            }
-            return viewer.isRequireCompressed();
-        }
-
-        private void askForFullImage(final String ip) {
+        private void askForFullImage(final String ip, final boolean reqCompress) {
             System.out.println("Asking for data...");
-            final IPPacket subscribePacket = new IPPacket(localIp, requiresCompression(ip));
+            final IPPacket subscribePacket = new IPPacket(localIp, reqCompress);
             final byte[] subscribeData = subscribePacket.serialize(NetworkPacketType.SUBSCRIBE_AS_VIEWER);
             final ClientNode destNode = new ClientNode(ip, port);
             networking.sendData(subscribeData, new ClientNode[] {destNode}, ModuleType.SCREENSHARING.ordinal(), 2);

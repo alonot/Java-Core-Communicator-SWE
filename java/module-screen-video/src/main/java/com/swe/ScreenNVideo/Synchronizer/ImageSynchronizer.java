@@ -38,6 +38,8 @@ public class ImageSynchronizer {
         return expectedFeedNumber;
     }
 
+    public boolean reqCompression = false;
+
     /**
      * Sets the expected feedNumber.
      * @param expectedFeedNumberArgs the number to update

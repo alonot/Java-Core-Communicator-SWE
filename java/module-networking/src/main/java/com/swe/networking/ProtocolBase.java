@@ -14,9 +14,6 @@ public interface ProtocolBase {
      */
     SocketChannel openSocket();
 
-
-    void printKeys();
-
     /**
      * Function to print all keys in a slector.
      */
