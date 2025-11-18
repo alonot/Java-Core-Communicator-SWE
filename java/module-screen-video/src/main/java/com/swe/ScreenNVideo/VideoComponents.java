@@ -126,13 +126,13 @@ public class VideoComponents {
         final FeedPatch patches = patchGenerator.generateFullImage(feed);
 
         final CPackets compressedNetworkPackets =
-            new CPackets(videoFeedNumber, localIp, false, true, feed.length, feed[0].length,
+            new CPackets(videoFeedNumber, localIp, true, true, feed.length, feed[0].length,
                 patches.compressedPatches());
         System.out.println("Feed number : " + compressedNetworkPackets.packetNumber());
         final byte[] compressedEncodedPatches = serializeFeed(compressedNetworkPackets);
 
         final CPackets unCompressedNetworkPackets =
-            new CPackets(videoFeedNumber, localIp, false, false, feed.length, feed[0].length,
+            new CPackets(videoFeedNumber, localIp, true, false, feed.length, feed[0].length,
                 patches.unCompressedPatches());
         final byte[] unCompressedEncodedPatches = serializeFeed(unCompressedNetworkPackets);
 

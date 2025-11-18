@@ -427,7 +427,7 @@ public class MediaCaptureManager implements CaptureManager {
             if (fullImageEncoded == null) {
                 return;
             }
-//            System.out.println("Sending Full Image");
+            System.out.println("Sending Full Image");
             networking.sendData(fullImageEncoded, new ClientNode[] {new ClientNode(ip, port)},
                 ModuleType.SCREENSHARING.ordinal(), 2);
         }
