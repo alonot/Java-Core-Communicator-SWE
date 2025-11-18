@@ -1,4 +1,4 @@
-package com.swe.ScreenNVideo.Serializer;
+package com.swe.ScreenNVideo.Model;
 
 import com.swe.ScreenNVideo.Utils;
 

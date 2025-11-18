@@ -1,7 +1,7 @@
 package com.swe.ScreenNVideo.PatchGenerator;
 
 import com.swe.ScreenNVideo.Codec.Codec;
-import com.swe.ScreenNVideo.Serializer.FeedPatch;
+import com.swe.ScreenNVideo.Model.FeedPatch;
 import com.swe.ScreenNVideo.Utils;
 
 import java.util.ArrayList;

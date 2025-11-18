@@ -1,7 +1,7 @@
 package com.swe.ScreenNVideo.Codec;
 
 import com.swe.ScreenNVideo.PatchGenerator.CompressedPatch;
-import com.swe.ScreenNVideo.Serializer.CPackets;
+import com.swe.ScreenNVideo.Model.CPackets;
 import com.swe.ScreenNVideo.Utils;
 import org.junit.jupiter.api.Test;
 

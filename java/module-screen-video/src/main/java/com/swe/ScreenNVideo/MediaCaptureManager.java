@@ -3,14 +3,15 @@ package com.swe.ScreenNVideo;
 
 import com.swe.ScreenNVideo.Capture.BackgroundCaptureManager;
 import com.swe.ScreenNVideo.Codec.ADPCMDecoder;
+import com.swe.ScreenNVideo.Model.APackets;
+import com.swe.ScreenNVideo.Model.CPackets;
+import com.swe.ScreenNVideo.Model.Feed;
+import com.swe.ScreenNVideo.Model.IPPacket;
+import com.swe.ScreenNVideo.Model.NetworkPacketType;
+import com.swe.ScreenNVideo.Model.RImage;
+import com.swe.ScreenNVideo.Model.Viewer;
 import com.swe.ScreenNVideo.PatchGenerator.CompressedPatch;
 import com.swe.ScreenNVideo.Playback.AudioPlayer;
-import com.swe.ScreenNVideo.Serializer.APackets;
-import com.swe.ScreenNVideo.Serializer.CPackets;
-import com.swe.ScreenNVideo.Serializer.Feed;
-import com.swe.ScreenNVideo.Serializer.NetworkPacketType;
-import com.swe.ScreenNVideo.Serializer.NetworkSerializer;
-import com.swe.ScreenNVideo.Serializer.RImage;
 import com.swe.ScreenNVideo.Synchronizer.FeedData;
 import com.swe.ScreenNVideo.Synchronizer.ImageSynchronizer;
 import com.swe.core.RPCinterface.AbstractRPC;
@@ -22,7 +23,6 @@ import com.swe.networking.ModuleType;
 import javax.sound.sampled.LineUnavailableException;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -62,7 +62,7 @@ public class MediaCaptureManager implements CaptureManager {
     /**
      * List of viewers to send the video Feed.
      */
-    private final HashSet<ClientNode> viewers;
+    private final HashMap<String, Viewer> viewers;
 
     /**
      * Client handler for incoming messages.
@@ -106,7 +106,7 @@ public class MediaCaptureManager implements CaptureManager {
 
 
         imageSynchronizers = new HashMap<>();
-        viewers = new HashSet<>();
+        viewers = new HashMap<>();
 
         // Cache local IP once to avoid repeated socket operations during capture
         this.localIp = Utils.getSelfIP();
@@ -124,28 +124,30 @@ public class MediaCaptureManager implements CaptureManager {
      * Only till broadcast is supported, multicast not supported yet.
      */
     public void broadcastJoinMeeting() {
+        final IPPacket subscriberPacket = new IPPacket(localIp, true);
 
         // System.out.println("Broadcasting join meeting to : " + Arrays.toString(clientNodes));
-        final byte[] subscribeData = NetworkSerializer.serializeIP(NetworkPacketType.SUBSCRIBE_AS_VIEWER, localIp);
+        final byte[] subscribeData = subscriberPacket.serialize(NetworkPacketType.SUBSCRIBE_AS_VIEWER);
         networking.broadcast(subscribeData, ModuleType.SCREENSHARING.ordinal(), 2);
     }
 
-    @Override
-    public void newParticipantJoined(final String ip) {
-        clientHandler.addUserNFullImageRequest(ip);
-    }
-
-    private void addParticipant(final String ip) {
+    private void addParticipant(final String ip, final boolean reqCompression) {
         if (ip == null) {
             return;
         }
-//        if (localIp != null && ip == localIp) {
-//            return;
-//        }
+        if (localIp != null && ip == localIp) {
+            return;
+        }
         final ClientNode node = new ClientNode(ip, port);
-        viewers.add(node);
-        imageSynchronizers.put(ip, new ImageSynchronizer(videoComponent.getVideoCodec()));
+        final Viewer viewer = viewers.computeIfAbsent(ip, k -> new Viewer(node, reqCompression));
+        viewer.setRequireCompressed(reqCompression);
+        imageSynchronizers.computeIfAbsent(ip, k -> new ImageSynchronizer(videoComponent.getVideoCodec()));
         rpc.call(Utils.SUBSCRIBE_AS_VIEWER, ip.getBytes());
+    }
+
+    private void removeViewer(final String ip) {
+        viewers.remove(ip);
+        imageSynchronizers.remove(ip);
     }
 
     /**
@@ -161,41 +163,50 @@ public class MediaCaptureManager implements CaptureManager {
             final int[][] newFeed = videoComponent.getFeed();
             if (encodedFeed == null) {
                 if (feed != null && newFeed == null) {
-                    final byte[] subscribeData = NetworkSerializer.serializeIP(NetworkPacketType.STOP_SHARE, localIp);
-                    sendDataToViewers(subscribeData);
-                    feed = newFeed;
+                    final IPPacket subscriberPacket = new IPPacket(localIp, false);
+                    final byte[] subscribeData = subscriberPacket.serialize(NetworkPacketType.STOP_SHARE);
+                    sendDataToViewers(subscribeData, k -> true);
+                    feed = null;
                 }
             } else {
-                final boolean isOnlyVideoOn = videoComponent.isVideoCaptureOn() && !videoComponent.isScreenCaptureOn();
-                final boolean viewerDemandCompress = true;
-                final boolean useCompress = isOnlyVideoOn || viewerDemandCompress;
-                byte[] encodedPatches = null;
-                if (useCompress) {
-                    encodedPatches = encodedFeed.compressedFeed();
-                } else {
-                    encodedPatches = encodedFeed.unCompressedFeed();
-                }
                 feed = newFeed;
-                sendDataToViewers(encodedPatches);
+                // send compressedFeed
+                sendDataToViewers(encodedFeed.compressedFeed(), Viewer::isRequireCompressed);
+                // send unCompressedFeed
+                sendDataToViewers(encodedFeed.unCompressedFeed(), viewer -> !viewer.isRequireCompressed());
             }
             // get audio Feed
             final byte[] encodedAudio = videoComponent.captureAudio();
             if (encodedAudio == null) {
                 continue;
             }
-//            System.err.println("Sending audio");
-            sendDataToViewers(encodedAudio);
+
+            networking.broadcast(encodedAudio, ModuleType.SCREENSHARING.ordinal(), 2);
         }
     }
 
-    private void sendDataToViewers(final byte[] feed) {
+    /**
+     * Applies filter and send data to those viewers.
+     *
+     * @param feed         the data to send
+     * @param viewerFilter predicate to filter which viewers should receive the data
+     */
+    private void sendDataToViewers(final byte[] feed, final java.util.function.Predicate<Viewer> viewerFilter) {
         if (feed == null) {
             return;
         }
 
+        final ClientNode[] clientNodes = viewers.values().stream()
+            .filter(viewerFilter)
+            .map(Viewer::getNode)
+            .toArray(ClientNode[]::new);
+
+        if (clientNodes.length == 0) {
+            return;
+        }
+
         System.out.println("Size : " + feed.length / Utils.KB + " KB");
-        viewers.forEach(v -> // System.out.println("Viewer IP : " + v.hostName()));
-            networking.sendData(feed, viewers.toArray(new ClientNode[0]), ModuleType.SCREENSHARING.ordinal(), 2));
+        networking.sendData(feed, clientNodes, ModuleType.SCREENSHARING.ordinal(), 2);
 
         System.out.println("Sent to viewers " + viewers.size());
 //        CompletableFuture.runAsync(() -> {
@@ -222,7 +233,7 @@ public class MediaCaptureManager implements CaptureManager {
         @Override
         public void receiveData(final byte[] data) {
 
-//            // System.out.println("Recieved");
+//            System.out.println("Received");
             if (data.length == 0) {
                 return;
             }
@@ -247,8 +258,8 @@ public class MediaCaptureManager implements CaptureManager {
 
                     ImageSynchronizer imageSynchronizer = imageSynchronizers.get(networkPackets.ip());
                     if (imageSynchronizer == null) {
-                        // add new participant if not already present
-                        addParticipant(networkPackets.ip());
+                        // add new participant if not already present, with true by default
+                        addParticipant(networkPackets.ip(), true);
                         imageSynchronizer = imageSynchronizers.get(networkPackets.ip());
                     }
 
@@ -262,9 +273,9 @@ public class MediaCaptureManager implements CaptureManager {
                         imageSynchronizer.setExpectedFeedNumber(networkPackets.packetNumber());
 
                         // drop all entries older than this full image
-                        while (!imageSynchronizer.getHeap().isEmpty() &&
-                            imageSynchronizer.getHeap().peek().getFeedNumber() <=
-                                imageSynchronizer.getExpectedFeedNumber()) {
+                        while (!imageSynchronizer.getHeap().isEmpty()
+                            && imageSynchronizer.getHeap().peek().getFeedNumber()
+                            <= imageSynchronizer.getExpectedFeedNumber()) {
                             imageSynchronizer.getHeap().poll();
                         }
                         imageSynchronizer.waitingForFullImage = false;
@@ -338,7 +349,7 @@ public class MediaCaptureManager implements CaptureManager {
                         }
                         final boolean success = res[0] == 1;
                         if (!success) {
-                            addParticipant(networkPackets.ip());
+                            addParticipant(networkPackets.ip(), requiresCompression(networkPackets.ip()));
                         }
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace(System.out);
@@ -346,13 +357,12 @@ public class MediaCaptureManager implements CaptureManager {
 
                 }
                 case NetworkPacketType.SUBSCRIBE_AS_VIEWER -> {
-                    final String viewerIP = NetworkSerializer.deserializeIP(data);
+                    final IPPacket viewerIP = IPPacket.deserialize(data);
                     System.out.println("Viewer joined" + viewerIP);
-                    addUserNFullImageRequest(viewerIP);
-                    System.out.println("Handled packet type: " + type);
+                    addUserNFullImageRequest(viewerIP.ip(), viewerIP.reqCompression());
                 }
                 case STOP_SHARE -> {
-                    final String viewerIP = NetworkSerializer.deserializeIP(data);
+                    final String viewerIP = IPPacket.deserialize(data).ip();
                     rpc.call(Utils.STOP_SHARE, viewerIP.getBytes());
                 }
                 case APACKETS -> {
@@ -361,20 +371,34 @@ public class MediaCaptureManager implements CaptureManager {
                     final byte[] audioBytes = audioDecoder.decode(audioPackets.data());
                     audioPlayer.play(audioBytes);
                 }
+                case UNSUBSCRIBE_AS_VIEWER -> {
+                    final IPPacket viewerIP = IPPacket.deserialize(data);
+                    System.out.println("Viewer requested to be removed" + viewerIP);
+                    removeViewer(viewerIP.ip());
+                }
                 default -> {
                 }
             }
         }
 
+        private boolean requiresCompression(final String ip) {
+            final Viewer viewer = viewers.get(ip);
+            if (viewer == null) {
+                return true;
+            }
+            return viewer.isRequireCompressed();
+        }
+
         private void askForFullImage(final String ip) {
             System.out.println("Asking for data...");
-            final byte[] subscribeData = NetworkSerializer.serializeIP(NetworkPacketType.SUBSCRIBE_AS_VIEWER, localIp);
+            final IPPacket subscribePacket = new IPPacket(localIp, requiresCompression(ip));
+            final byte[] subscribeData = subscribePacket.serialize(NetworkPacketType.SUBSCRIBE_AS_VIEWER);
             final ClientNode destNode = new ClientNode(ip, port);
             networking.sendData(subscribeData, new ClientNode[] {destNode}, ModuleType.SCREENSHARING.ordinal(), 2);
         }
 
-        public void addUserNFullImageRequest(final String ip) {
-            addParticipant(ip);
+        public void addUserNFullImageRequest(final String ip, final boolean reqCompression) {
+            addParticipant(ip, reqCompression);
             final Feed fullFeed = videoComponent.captureFullImage();
             if (fullFeed == null) {
                 return;
@@ -382,8 +406,7 @@ public class MediaCaptureManager implements CaptureManager {
             // get the required type(Compress/UnCompress) from viewer list
             // use Compress if not video and asked for it
             final boolean isOnlyVideoOn = videoComponent.isVideoCaptureOn() && !videoComponent.isScreenCaptureOn();
-            final boolean viewerDemandCompress = true;
-            final boolean useCompress = isOnlyVideoOn || viewerDemandCompress;
+            final boolean useCompress = isOnlyVideoOn || reqCompression;
             byte[] fullImageEncoded = null;
             if (useCompress) {
                 fullImageEncoded = fullFeed.compressedFeed();

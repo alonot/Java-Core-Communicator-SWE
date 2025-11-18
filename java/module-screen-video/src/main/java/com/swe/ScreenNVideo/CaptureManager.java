@@ -12,10 +12,4 @@ public interface CaptureManager {
      */
     void startCapture() throws ExecutionException, InterruptedException;
 
-    /**
-     * For the Controller module to call this every time a
-     * new participant joins.
-     * @param ip IP of the new participant
-     */
-    void newParticipantJoined(String ip);
 }

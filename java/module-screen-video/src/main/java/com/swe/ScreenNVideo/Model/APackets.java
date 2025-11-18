@@ -1,14 +1,8 @@
-package com.swe.ScreenNVideo.Serializer;
+package com.swe.ScreenNVideo.Model;
 
-import com.swe.ScreenNVideo.PatchGenerator.CompressedPatch;
-import com.swe.ScreenNVideo.Utils;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Audio Packets to be sent over networking layer.
