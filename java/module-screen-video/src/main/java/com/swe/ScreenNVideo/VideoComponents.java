@@ -59,7 +59,7 @@ public class VideoComponents {
     /**
      * Video Feed number.
      */
-    private int videoFeedNumber = -1;
+    private int videoFeedNumber = 0;
 
     /**
      * Audio Feed number.
@@ -271,9 +271,8 @@ public class VideoComponents {
         runCount++;
 
 
-        // increase the feed number and update the feed
+        // update the feed
         feed = newFeed;
-        videoFeedNumber++;
 
         final CPackets compressedNetworkPackets =
             new CPackets(videoFeedNumber, localIp, false, true, feed.length, feed[0].length,
@@ -305,6 +304,8 @@ public class VideoComponents {
         // make it zero. This will fill up to 500 in case no diff is detected from long time
         runCount = 0;
 
+        videoFeedNumber++;
+
         // Asynchronously send a serialized RImage to the UI so we don't block capture
         submitUIUpdate(feed);
 
@@ -321,6 +322,7 @@ public class VideoComponents {
     private byte[] serializeFeed(final CPackets networkPackets) {
         byte[] encodedPatches = null;
         if (networkPackets.packets().isEmpty()) {
+            System.out.println("Empty");
             return null;
         }
         int tries = Utils.MAX_TRIES_TO_SERIALIZE;

@@ -3,8 +3,8 @@ package com.swe.ScreenNVideo.IntegrationTest;
 import com.swe.ScreenNVideo.Utils;
 import com.swe.networking.ClientNode;
 import com.swe.networking.ModuleType;
-import com.swe.networking.SimpleNetworking.AbstractNetworking;
-import com.swe.networking.SimpleNetworking.MessageListener;
+import com.swe.networking.AbstractNetworking;
+import com.swe.networking.MessageListener;
 
 import java.nio.ByteBuffer;
 import java.util.Map;
@@ -64,34 +64,13 @@ public class DummyNetworkingWithQueue implements AbstractNetworking {
         packetQueue.offer(buffer.array());
     }
 
-    public void sendData(final byte[] data, final ClientNode[] dest, final ModuleType module) {
-
-    }
-
-    public void sendData(final byte[] data) {
-
-    }
-
-    public void subscribe(final String name, final MessageListener function) {
-        subscriptions.put(name, function);
-    }
-
-    public void removeSubscription(final String name) {
-        subscriptions.remove(name);
-    }
-
     @Override
-    public void sendData(final byte[] data, final ClientNode[] destIp, final ModuleType module, final int priority) {
-        sendData(data, new String[]{""}, new int[]{0});
-    }
-
-    @Override
-    public void subscribe(final ModuleType name, final com.swe.networking.SimpleNetworking.MessageListener function) {
+    public void subscribe(int name, MessageListener function) {
         subscriptions.put(Utils.MODULE_REMOTE_KEY, function);
     }
 
     @Override
-    public void removeSubscription(final ModuleType name) {
+    public void removeSubscription(int name) {
 
     }
 
@@ -124,7 +103,26 @@ public class DummyNetworkingWithQueue implements AbstractNetworking {
         }
     }
 
-    public void shutdown() {
-        running = false;
+    @Override
+    public void sendData(byte[] data, ClientNode[] dest, int module, int priority) {
+        if (data == null || dest == null) {
+            return;
+        }
+
+        String[] ips = new String[dest.length];
+        int[] ports = new int[dest.length];
+
+        for (int i = 0; i < dest.length; i++) {
+            ips[i] = dest[i].hostName();
+            ports[i] = dest[i].port(); // Use same port for all destinations
+        }
+
+        sendData(data, ips, ports);
     }
+
+    @Override
+    public void broadcast(byte[] data, int module, int priority) {
+
+    }
+
 }
