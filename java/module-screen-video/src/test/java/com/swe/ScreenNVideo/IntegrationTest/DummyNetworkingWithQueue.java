@@ -122,7 +122,7 @@ public class DummyNetworkingWithQueue implements AbstractNetworking {
 
     @Override
     public void broadcast(byte[] data, int module, int priority) {
-
+        sendData(data, new String[0], new int[0]);
     }
 
 }

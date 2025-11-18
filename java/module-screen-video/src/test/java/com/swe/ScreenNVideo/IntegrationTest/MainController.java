@@ -30,8 +30,9 @@ public class MainController {
 
     static void main(final String[] args) throws InterruptedException {
 //        final SimpleNetworking networking = SimpleNetworking.getSimpleNetwork();
-        final AbstractNetworking networking = Networking.getNetwork();
+//        final AbstractNetworking networking = Networking.getNetwork();
 //        final AbstractNetworking networking = new DummyNetworking();
+        final AbstractNetworking networking = new DummyNetworkingWithQueue();
 
         // Get IP address as string
         final String ipAddress = getSelfIP();
@@ -54,8 +55,8 @@ public class MainController {
 
 //        SimpleNetworking.getSimpleNetwork().addUser(deviceNode, serverNode);
 
-        AbstractController networkingCom = Networking.getNetwork();
-        networkingCom.addUser(deviceNode, serverNode); // DummyNetworking doesn't need this
+//        AbstractController networkingCom = Networking.getNetwork();
+//        networkingCom.addUser(deviceNode, serverNode); // DummyNetworking doesn't need this
 
         screenNVideo.broadcastJoinMeeting();
         System.out.println("COnnected");

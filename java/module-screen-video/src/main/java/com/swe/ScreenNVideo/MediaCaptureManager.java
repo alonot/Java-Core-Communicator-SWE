@@ -193,6 +193,7 @@ public class MediaCaptureManager implements CaptureManager {
             }
 
             networking.broadcast(encodedAudio, ModuleType.SCREENSHARING.ordinal(), 2);
+//            sendDataToViewers(encodedAudio, viewer -> true);
         }
     }
 
@@ -369,7 +370,7 @@ public class MediaCaptureManager implements CaptureManager {
                         if (!success) {
                             addParticipant(networkPackets.ip(), imageSynchronizer.reqCompression);
                         }
-//                        System.out.println("Done");
+                        System.out.println("Done");
                     } catch (InterruptedException | ExecutionException e) {
                         e.printStackTrace(System.out);
                     }
@@ -386,7 +387,7 @@ public class MediaCaptureManager implements CaptureManager {
                 }
                 case APACKETS -> {
                     final APackets audioPackets = APackets.deserialize(data);
-//                    // System.out.println("Audio" + audioPackets.packetNumber());
+                     System.out.println("Audio" + audioPackets.packetNumber());
                     final byte[] audioBytes = audioDecoder.decode(audioPackets.data());
                     audioPlayer.play(audioBytes);
                 }

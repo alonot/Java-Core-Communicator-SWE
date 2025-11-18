@@ -246,8 +246,15 @@ public class CaptureComponents {
         });
 
         rpc.subscribe(Utils.SUBSCRIBE_AS_VIEWER, (final byte[] args) -> {
+            final byte[] res = new byte[1];
+            res[0] = 1;
             // Get the destination user IP
             final IPPacket dest = IPPacket.deserialize(args);
+
+            if (dest.ip().equals(localIp)) {
+                System.out.println("------Not ----" + localIp);
+                return res;
+            }
 
             final ClientNode destNode = new ClientNode(dest.ip(), port);
 
@@ -257,14 +264,19 @@ public class CaptureComponents {
             final byte[] subscribeData = subsPacket.serialize(NetworkPacketType.SUBSCRIBE_AS_VIEWER);
             networking.sendData(subscribeData, new ClientNode[] {destNode}, ModuleType.SCREENSHARING.ordinal(), 2);
 
-            final byte[] res = new byte[1];
-            res[0] = 1;
             return res;
         });
 
         rpc.subscribe(Utils.UNSUBSCRIBE_AS_VIEWER, (final byte[] args) -> {
+            final byte[] res = new byte[1];
+            res[0] = 1;
+
             // Get the destination user IP
             final IPPacket dest = IPPacket.deserialize(args);
+
+            if (dest.ip().equals(localIp)) {
+                return res;
+            }
 
             final ClientNode destNode = new ClientNode(dest.ip(), port);
 
@@ -273,8 +285,6 @@ public class CaptureComponents {
             final byte[] unSubscribeData = subsPacket.serialize(NetworkPacketType.UNSUBSCRIBE_AS_VIEWER);
             networking.sendData(unSubscribeData, new ClientNode[] {destNode}, ModuleType.SCREENSHARING.ordinal(), 2);
 
-            final byte[] res = new byte[1];
-            res[0] = 1;
             return res;
         });
 

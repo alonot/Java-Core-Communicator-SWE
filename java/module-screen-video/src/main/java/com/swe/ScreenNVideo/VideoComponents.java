@@ -64,7 +64,7 @@ public class VideoComponents {
     /**
      * Audio Feed number.
      */
-    private int audioFeedNumber = -1;
+    private int audioFeedNumber = 0;
 
     /**
      * Current feed.

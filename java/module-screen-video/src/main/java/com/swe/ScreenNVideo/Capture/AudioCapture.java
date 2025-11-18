@@ -84,6 +84,7 @@ public class AudioCapture implements com.swe.ScreenNVideo.Capture.IAudioCapture,
                 audioQueue.offer(chunk); // non-blocking insert
             }
         }
+        System.out.println("AudioCapture thread stopped. Total chunks captured: ");
     }
 
     @Override

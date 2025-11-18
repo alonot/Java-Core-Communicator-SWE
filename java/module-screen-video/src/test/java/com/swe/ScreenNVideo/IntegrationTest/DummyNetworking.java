@@ -72,7 +72,6 @@ public class DummyNetworking implements AbstractNetworking {
      * Start the receiver thread.
      */
     private void startReceiver() throws IOException {
-
         serverSocket = new ServerSocket(listenPort);
         Thread receiverThread = new Thread(this::receiveLoop, "DummyNetworkingReceiver");
         receiverThread.start();
@@ -197,7 +196,7 @@ public class DummyNetworking implements AbstractNetworking {
 
     @Override
     public void broadcast(byte[] data, int module, int priority) {
-        sendData(data, new ClientNode[]{new ClientNode("10.32.13.93", 40000)},module,priority);
+        sendData(data, new ClientNode[]{new ClientNode("10.32.1.250", 40000)},module,priority);
     }
 
     @Override
