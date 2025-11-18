@@ -322,7 +322,7 @@ public class VideoComponents {
     private byte[] serializeFeed(final CPackets networkPackets) {
         byte[] encodedPatches = null;
         if (networkPackets.packets().isEmpty()) {
-            System.out.println("Empty");
+//            System.out.println("Empty");
             return null;
         }
         int tries = Utils.MAX_TRIES_TO_SERIALIZE;
