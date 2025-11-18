@@ -144,7 +144,7 @@ public class MediaCaptureManager implements CaptureManager {
         if (ip == null) {
             return;
         }
-        if (localIp != null && ip == localIp) {
+        if (ip.equals(localIp)) {
             return;
         }
         final ClientNode node = new ClientNode(ip, port);
@@ -278,8 +278,8 @@ public class MediaCaptureManager implements CaptureManager {
                     }
 
 
-//                    // System.out.println("Recieved " + networkPackets.packetNumber() + "; Expected : " +
-//                        imageSynchronizer.getExpectedFeedNumber());
+//                     System.out.println("Recieved " + networkPackets.packetNumber() + "; Expected : " +
+//                        imageSynchronizer.getExpectedFeedNumber() + " " + imageSynchronizer.getHeap().size() + " " + imageSynchronizer.waitingForFullImage);
 
                     if (networkPackets.isFullImage()) {
                         System.out.println("Full Image");
@@ -288,28 +288,28 @@ public class MediaCaptureManager implements CaptureManager {
 
                         imageSynchronizer.waitingForFullImage = false;
 
-                    } else if (imageSynchronizer.waitingForFullImage) {
-                        return;
-                    } else {
-
-                        // if heap is growing too large, request a full frame to resync
-                        if (imageSynchronizer.getHeap().size() >= Utils.MAX_HEAP_SIZE) {
-                            System.out.println("Too Large");
-                            askForFullImage(networkPackets.ip(), imageSynchronizer.reqCompression);
-                            imageSynchronizer.waitingForFullImage = true;
-                            imageSynchronizer.getHeap().clear();
-                            return;
-                        }
                     }
+
+                    imageSynchronizer.getHeap().add(new FeedData(networkPackets.packetNumber(), networkPackets));
+
+                    // if heap is growing too large, request a full frame to resync
+                    if (imageSynchronizer.getHeap().size() >= Utils.MAX_HEAP_SIZE) {
+                        System.out.println("Too Large");
+                        askForFullImage(networkPackets.ip(), imageSynchronizer.reqCompression);
+                        imageSynchronizer.waitingForFullImage = true;
+                        imageSynchronizer.getHeap().clear();
+                        return;
+                    }
+
 
                     // drop all entries older than this full image
                     while (!imageSynchronizer.getHeap().isEmpty()
                         && imageSynchronizer.getHeap().peek().getFeedNumber()
-                        <= imageSynchronizer.getExpectedFeedNumber()) {
+                        < imageSynchronizer.getExpectedFeedNumber()) {
+//                        System.out.println("Removing " + imageSynchronizer.getHeap().peek().getFeedNumber());
                         imageSynchronizer.getHeap().poll();
                     }
 
-                    imageSynchronizer.getHeap().add(new FeedData(networkPackets.packetNumber(), networkPackets));
 
                     int[][] image = null;
                     while (true) {
