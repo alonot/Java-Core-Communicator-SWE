@@ -3,7 +3,6 @@ package com.swe.networking;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -32,9 +31,6 @@ public final class TCPCommunicator implements ProtocolBase {
      */
     private Selector selector;
 
-    public void printKeys() {
-        selector.keys().stream().forEach(kay -> System.out.println(kay.channel()));
-    }
     /**
      * The list of all connected clients and their sockets.
      *
@@ -63,13 +59,20 @@ public final class TCPCommunicator implements ProtocolBase {
         try {
             NetworkLogger.printInfo(MODULENAME, "TCP communicator initialized...");
             selector = Selector.open();
-            System.out.println("INIT..............");
             deviceServerPort = serverPort;
             setServerPort();
         } catch (IOException ex) {
             // NetworkLogger.printError(MODULENAME, "Unable to initialize TCP comunicator...");
             // NetworkLogger.printError(MODULENAME, "Error : " + ex.getMessage());
         }
+    }
+
+    /**
+     * Function to print all keys in the selector.
+     */
+    @Override
+    public void printKeys() {
+        selector.keys().stream().forEach(kay -> System.out.println(kay.channel()));
     }
 
     @Override
@@ -155,11 +158,9 @@ public final class TCPCommunicator implements ProtocolBase {
             if (clientSockets.containsKey(dest)) {
                 NetworkLogger.printInfo(MODULENAME, "Connection to " + dest + " exists already...");
                 destSocket = clientSockets.get(dest);
-//                System.out.println("COnnec exists " + destSocket.socket().getRemoteSocketAddress()  + " Local " + destSocket.socket().getLocalAddress() + " " + destSocket.socket().getLocalPort());
             } else {
                 destSocket = openSocket();
                 destSocket.configureBlocking(true);
-//                System.out.println("Connecting to "+ dest + " " + destIp);
                 NetworkLogger.printInfo(MODULENAME, "Client : " + dest + " ...");
                 destSocket.connect(new InetSocketAddress(destIp, destPort));
                 destSocket.configureBlocking(false);
@@ -174,8 +175,8 @@ public final class TCPCommunicator implements ProtocolBase {
             }
             printIpAddr(destIp, destPort);
         } catch (IOException ex) {
-             NetworkLogger.printError(MODULENAME, "Error while sending data...");
-             NetworkLogger.printError(MODULENAME, "Error : " + ex.getMessage());
+            NetworkLogger.printError(MODULENAME, "Error while sending data...");
+            NetworkLogger.printError(MODULENAME, "Error : " + ex.getMessage());
         }
     }
 
@@ -186,7 +187,6 @@ public final class TCPCommunicator implements ProtocolBase {
      */
     public void acceptConnection(final SelectionKey key) {
         try {
-            System.out.println("Accepting conn");
             NetworkLogger.printInfo(MODULENAME, "Accepting new connection...");
             final ServerSocketChannel serverSocketChannel = (ServerSocketChannel) key.channel();
             final SocketChannel clientChannel = serverSocketChannel.accept();

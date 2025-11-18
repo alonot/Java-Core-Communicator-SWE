@@ -56,6 +56,13 @@ public class AudioPlayer {
      */
 
     public void play(final byte[] pcmBytes) {
+        while (line.isActive()) {
+            try {
+                Thread.sleep(1);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
         if (line != null) {
             line.write(pcmBytes, 0, pcmBytes.length);
         }

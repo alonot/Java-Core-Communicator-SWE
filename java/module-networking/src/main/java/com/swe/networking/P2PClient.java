@@ -3,9 +3,7 @@ package com.swe.networking;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The Client belonging to a certain cluster.
@@ -72,6 +70,7 @@ public class P2PClient implements P2PUser {
      *
      * @param device The ClientNode info for this device.
      * @param server The ClientNode info for the mainServer.
+     * @param tcpCommunicator the communicator for the communication.
      */
     public P2PClient(final ClientNode device, final ClientNode server, final ProtocolBase tcpCommunicator) {
         this.deviceAddress = device;

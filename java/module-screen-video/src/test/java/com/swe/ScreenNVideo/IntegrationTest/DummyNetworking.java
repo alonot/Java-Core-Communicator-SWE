@@ -5,6 +5,7 @@ import com.swe.networking.ClientNode;
 import com.swe.networking.ModuleType;
 import com.swe.networking.AbstractNetworking;
 import com.swe.networking.MessageListener;
+import com.swe.networking.SimpleNetworking.SimpleNetworking;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -15,6 +16,9 @@ import java.net.Socket;
 import java.security.spec.RSAOtherPrimeInfo;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.swe.ScreenNVideo.IntegrationTest.MainController.SERVERPORT;
+import static com.swe.ScreenNVideo.Utils.getSelfIP;
 
 /**
  * Simple dummy networking implementation using TCP sockets.
@@ -51,11 +55,13 @@ public class DummyNetworking implements AbstractNetworking {
         }
     }
 
+    SimpleNetworking networking;
+
     /**
      * Constructor with default port 9999.
      */
     public DummyNetworking() {
-        this(40000);
+        this(SERVERPORT);
     }
 
     public String getSelfIP() {
@@ -66,6 +72,7 @@ public class DummyNetworking implements AbstractNetworking {
      * Start the receiver thread.
      */
     private void startReceiver() throws IOException {
+
         serverSocket = new ServerSocket(listenPort);
         Thread receiverThread = new Thread(this::receiveLoop, "DummyNetworkingReceiver");
         receiverThread.start();
@@ -85,12 +92,12 @@ public class DummyNetworking implements AbstractNetworking {
         for (int i = 0; i < dest.length && i < port.length; i++) {
             try (Socket socket = new Socket(dest[i], port[i]);
                  DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
-                
+
                 // Send length first, then data
                 out.writeInt(data.length);
                 out.write(data);
                 out.flush();
-                
+
             } catch (IOException e) {
                 System.err.println("Failed to send data to " + dest[i] + ":" + port[i] + " - " + e.getMessage());
             }
@@ -110,10 +117,10 @@ public class DummyNetworking implements AbstractNetworking {
             try {
                 // Accept incoming connection
                 Socket clientSocket = serverSocket.accept();
-                
+
                 // Handle each connection in a separate thread
                 handleConnection(clientSocket);
-                
+
             } catch (IOException e) {
                 if (running) {
                     System.err.println("Error accepting connection: " + e.getMessage());
@@ -127,20 +134,20 @@ public class DummyNetworking implements AbstractNetworking {
      */
     private void handleConnection(Socket socket) {
         try (DataInputStream in = new DataInputStream(socket.getInputStream())) {
-            
+
             // Read length
             int length = in.readInt();
-            
+
             // Read complete data
             byte[] data = new byte[length];
             in.readFully(data);
-            
+
             // Notify subscribers
             MessageListener listener = subscriptions.get(Utils.MODULE_REMOTE_KEY);
             if (listener != null) {
                 listener.receiveData(data);
             }
-            
+
         } catch (IOException e) {
             System.err.println("Error reading data: " + e.getMessage());
         } finally {
@@ -168,9 +175,14 @@ public class DummyNetworking implements AbstractNetworking {
 
     @Override
     public void sendData(byte[] data, ClientNode[] dest, int module, int priority) {
+//        if (networking == null) {
+//            networking = SimpleNetworking.getSimpleNetwork();
+//        }
         if (data == null || dest == null) {
             return;
         }
+
+//        networking.sendData(data, dest, ModuleType.SCREENSHARING, priority);
 
         String[] ips = new String[dest.length];
         int[] ports = new int[dest.length];
@@ -185,7 +197,7 @@ public class DummyNetworking implements AbstractNetworking {
 
     @Override
     public void broadcast(byte[] data, int module, int priority) {
-        sendData(data, new ClientNode[]{new ClientNode("10.128.2.128", 40000)},module,priority);
+        sendData(data, new ClientNode[]{new ClientNode("10.32.13.93", 40000)},module,priority);
     }
 
     @Override
@@ -198,4 +210,3 @@ public class DummyNetworking implements AbstractNetworking {
 
     }
 }
-

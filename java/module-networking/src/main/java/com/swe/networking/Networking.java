@@ -97,10 +97,10 @@ public class Networking implements AbstractNetworking, AbstractController {
      */
     @Override
     public void sendData(final byte[] data, final ClientNode[] dest, final int module, final int priority) {
-//        System.out.println("Data length : " + data.length);
-//        System.out.println("Destination : " + Arrays.toString(dest));
+        System.out.println("Data length : " + data.length);
+        System.out.println("Destination : " + Arrays.toString(dest));
         final Vector<byte[]> chunks = getChunks(data, dest, module, priority, 0);
-//        System.out.println("chunk number : " + chunks.size());
+        System.out.println("chunk number : " + chunks.size());
         for (byte[] chunk : chunks) {
             try {
                 final PacketInfo pktInfo = parser.parsePacket(chunk);
@@ -110,8 +110,8 @@ public class Networking implements AbstractNetworking, AbstractController {
                 final ClientNode newdest = new ClientNode(addr.getHostAddress(), port);
                 // long endTime = System.currentTimeMillis();
                 // System.out.println("Time to create new dest: " + (endTime - startTime) + " ms");
-//                System.out.println("Destination " + newdest);
-                 topology.sendPacket(chunk, newdest);
+                System.out.println("Destination " + newdest);
+                topology.sendPacket(chunk, newdest);
 //                priorityQueue.addPacket(chunk);
             } catch (UnknownHostException ex) {
             }
@@ -126,10 +126,8 @@ public class Networking implements AbstractNetworking, AbstractController {
             if (!priorityQueue.isEmpty()) {
                 final byte[] packet = priorityQueue.nextPacket();
                 try {
-                    System.out.println("TOok");
                     final PacketInfo pktInfo = parser.parsePacket(packet);
                     final InetAddress addr = pktInfo.getIpAddress();
-                    System.out.println("Got addr" + addr);
                     final int port = pktInfo.getPortNum();
                     final ClientNode dest = new ClientNode(addr.getHostAddress(), port);
                     topology.sendPacket(packet, dest);
@@ -184,12 +182,7 @@ public class Networking implements AbstractNetworking, AbstractController {
     @Override
     public void broadcast(final byte[] data, final int module, final int priority) {
         final ClientNode[] dest = {topology.getServer(user)};
-            sendData(data, dest, module, priority);
-//        final Vector<byte[]> chunks = getChunks(data, dest, module, priority, 1);
-//        for (byte[] chunk : chunks) {
-////                System.out.println("Broadcasting "  + chunk.length);
-////                priorityQueue.addPacket(chunk);
-//        }
+        sendData(data, dest, module, priority);
     }
 
     /**
@@ -237,7 +230,9 @@ public class Networking implements AbstractNetworking, AbstractController {
      */
     public void callSubscriber(final int module, final byte[] data) {
         final MessageListener function = listeners.get(module);
-        function.receiveData(data);
+        if (function != null) {
+            function.receiveData(data);
+        }
     }
 
     /**

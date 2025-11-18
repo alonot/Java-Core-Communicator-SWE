@@ -200,7 +200,7 @@ public class MainServer implements P2PUser {
                 final byte[] data = chunkManager.addChunk(packet);
                 final Networking networking = Networking.getNetwork();
                 if (data != null) {
-                    byte[] payload = parser.parsePacket(data).getPayload();
+                    final byte[] payload = parser.parsePacket(data).getPayload();
                     networking.callSubscriber(module, payload);
                 }
             } else if (connectionType == NetworkConnectionType.CLOSE.ordinal()) {
@@ -327,6 +327,8 @@ public class MainServer implements P2PUser {
         NetworkLogger.printInfo("MainServer", "Responding " + dest + " with a Hello packet...");
         final int clusterIdx = topology.addClient(dest);
 //        addClientToTimer(dest, clusterIdx);
+        // The controller is notified of any new client that is added.
+        Networking.getNetwork().callSubscriber(0, serializer.serializeClientNode(dest));
         sendNetworkPktResponse(dest);
         // send add packet to all cluster servers.
         final List<ClientNode> servers = topology.getAllClusterServers();
@@ -365,7 +367,7 @@ public class MainServer implements P2PUser {
     public void close() {
         receiveThread.interrupt();
         communicator.close();
-        timer.close();
+//        timer.close();
     }
 
     /**

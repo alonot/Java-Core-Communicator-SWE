@@ -6,7 +6,7 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Vector;
 
-import com.swe.core.RPCinterface.AbstractRPC;
+import com.swe.core.RPCinteface.AbstractRPC;
 import com.swe.networking.ClientNode;
 import com.swe.networking.ModuleType;
 import com.swe.networking.NetworkConnectionType;
