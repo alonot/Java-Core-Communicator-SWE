@@ -101,7 +101,7 @@ public final class Topology implements AbstractTopology {
             final ClientNode mainServerAddress) {
         // update the network and add the client
         if (deviceAddress.equals(mainServerAddress)) {
-            System.out.println("This device is considered as the main Server");
+//            System.out.println("This device is considered as the main Server");
             user = new MainServer(deviceAddress, mainServerAddress);
             final List<ClientNode> cluster = new ArrayList<>();
             cluster.add(deviceAddress);
@@ -166,7 +166,7 @@ public final class Topology implements AbstractTopology {
             clusters.add(cluster);
             clusterServers.add(clientAddress);
             numClusters++;
-            System.out.println("Adding to a new cluster...");
+//            System.out.println("Adding to a new cluster...");
             return numClusters - 1;
         }
     }
@@ -196,7 +196,7 @@ public final class Topology implements AbstractTopology {
             if (!clusters.get(idx).isEmpty()) {
                 final ClientNode newServer = clusters.get(idx).get(0);
                 clusterServers.set(idx, newServer);
-                System.out.println("A new server has been decided\n");
+//                System.out.println("A new server has been decided\n");
                 return;
             }
             clusters.remove(idx);

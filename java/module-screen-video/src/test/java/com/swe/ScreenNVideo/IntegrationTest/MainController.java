@@ -29,13 +29,13 @@ public class MainController {
 
     static void main(final String[] args) throws InterruptedException {
 //        final SimpleNetworking networking = SimpleNetworking.getSimpleNetwork();
-//        final AbstractNetworking networking = Networking.getNetwork();
-        final AbstractNetworking networking = new DummyNetworking();
+        final AbstractNetworking networking = Networking.getNetwork();
+//        final AbstractNetworking networking = new DummyNetworking();
 
         // Get IP address as string
         final String ipAddress = getSelfIP();
         final ClientNode deviceNode = new ClientNode(ipAddress, SERVERPORT);
-        final ClientNode serverNode = new ClientNode("10.128.2.128", SERVERPORT);
+        final ClientNode serverNode = new ClientNode("10.32.1.250", SERVERPORT);
 
         final RPC rpc = new RPC();
 
@@ -51,8 +51,8 @@ public class MainController {
             throw new RuntimeException(e);
         }
 
-//        AbstractController networkingCom = Networking.getNetwork();
-//        networkingCom.addUser(deviceNode, serverNode); // DummyNetworking doesn't need this
+        AbstractController networkingCom = Networking.getNetwork();
+        networkingCom.addUser(deviceNode, serverNode); // DummyNetworking doesn't need this
 
         screenNVideo.broadcastJoinMeeting();
         System.out.println("COnnected");

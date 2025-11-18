@@ -1,6 +1,8 @@
 package com.swe.ScreenNVideo.Codec;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Provides functionality for encoding and decoding images in the JPEG format.
@@ -174,35 +176,26 @@ public class JpegCodec implements Codec {
     private final IRLE enDeRLE = EncodeDecodeRLEHuffman.getInstance();
 
     /**
-     * Buffer for RLE results.
+     * Buffer for RLE results with compression On.
      */
-    private final ByteBuffer resRLEBuffer;
+    private final ByteBuffer resCompressedRLEBuffer;
+
+    /**
+     * Buffer for RLE results with compression OFF.
+     */
+    private final ByteBuffer resUnCompressedRLEBuffer;
 
     /**
      * Creates a JpegCode instance.
      */
     public JpegCodec() {
         int maxLen = (int) ((1200 * 800 * 1.5 * 4) + (4 * 3) + 0.5);
-        resRLEBuffer = ByteBuffer.allocate(maxLen);
+        resCompressedRLEBuffer = ByteBuffer.allocate(maxLen);
+        resUnCompressedRLEBuffer = ByteBuffer.allocate(maxLen);
     }
 
-    /**
-     * Encodes a portion of the screenshot into JPEG format.
-     *
-     * <p>The encoding process includes:
-     * <ul>
-     * <li>Converting the RGB pixel data of the screenshot into YCbCr color space.</li>
-     * <li>Applying 4:2:0 chroma sampling to reduce color resolution.</li>
-     * </ul>
-     *
-     * @param topLeftX starting X coordinate
-     * @param topLeftY starting Y coordinate
-     * @param height height of the region to encode
-     * @param width width of the region to encode
-     * @return encoded byte array
-     */
     @Override
-    public byte[] encode(final int[][] screenshot,final int topLeftX, final int topLeftY, final int height, final int width, final boolean compress) {
+    public List<byte[]> encode(final int[][] screenshot, final int topLeftX, final int topLeftY, final int height, final int width) {
 
         if (height % BLOCK_SIDE == 1 || width % BLOCK_SIDE == 1) {
             throw new RuntimeException("Invalid Matrix for encoding");
@@ -257,39 +250,40 @@ public class JpegCodec implements Codec {
             }
         }
 
-        resRLEBuffer.clear();
-        compressor.zigZagTime = 0;
-        compressor.quantTime = 0;
-        compressor.dctTime = 0;
+        resCompressedRLEBuffer.clear();
+        resUnCompressedRLEBuffer.clear();
+
+        // add the uncompressed versions first
+        enDeRLE.zigZagRLE(yMatrix, resUnCompressedRLEBuffer);
+        enDeRLE.zigZagRLE(cbMatrix, resUnCompressedRLEBuffer);
+        enDeRLE.zigZagRLE(crMatrix, resUnCompressedRLEBuffer);
+
 
         // YMatrix;
-        if (compress) {
+        compressor.compressLumin(yMatrix, (short) height, (short) width, resCompressedRLEBuffer);
 
-        compressor.compressLumin(yMatrix, (short) height, (short) width, resRLEBuffer);
-        }
-//        System.out.println("Compression Y : " + resRLEBuffer.position());
-        enDeRLE.zigZagRLE(yMatrix,resRLEBuffer);
         // CbMatrix;
-        if (compress) {
+        compressor.compressChrome(cbMatrix, (short) cbHeight, (short) cbWidth, resCompressedRLEBuffer);
 
-        compressor.compressChrome(cbMatrix, (short) cbHeight, (short) cbWidth, resRLEBuffer);
-        }
-//        System.out.println("Compression Cb : " + resRLEBuffer.position());
-        enDeRLE.zigZagRLE(cbMatrix,resRLEBuffer);
         // CyMatrix
-        if (compress) {
+        compressor.compressChrome(crMatrix, (short) cbHeight, (short) cbWidth, resCompressedRLEBuffer);
 
-        compressor.compressChrome(crMatrix, (short) cbHeight, (short) cbWidth, resRLEBuffer);
-        }
-//        System.out.println("Compression Cr : " + resRLEBuffer.position());
-        enDeRLE.zigZagRLE(crMatrix,resRLEBuffer);
+        // add the compressed patches
+        enDeRLE.zigZagRLE(yMatrix, resCompressedRLEBuffer);
+        enDeRLE.zigZagRLE(cbMatrix, resCompressedRLEBuffer);
+        enDeRLE.zigZagRLE(crMatrix, resCompressedRLEBuffer);
 
-        zigZagtime += compressor.zigZagTime;
-        dctTime += compressor.dctTime;
-        quantTime += compressor.quantTime;
-        final byte[] res = new byte[resRLEBuffer.position()];
-        resRLEBuffer.rewind();
-        resRLEBuffer.get(res);
+        final byte[] compressedData = new byte[resCompressedRLEBuffer.position()];
+        resCompressedRLEBuffer.rewind();
+        resCompressedRLEBuffer.get(compressedData);
+
+        final byte[] unCompressedData = new byte[resUnCompressedRLEBuffer.position()];
+        resUnCompressedRLEBuffer.rewind();
+        resUnCompressedRLEBuffer.get(unCompressedData);
+
+        final ArrayList<byte[]> res = new ArrayList<>();
+        res.add(compressedData);
+        res.add(unCompressedData);
         return res;
     }
 

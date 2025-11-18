@@ -1,5 +1,7 @@
 package com.swe.ScreenNVideo.Codec;
 
+import java.util.List;
+
 /**
  * Interface for encoding and decoding an image.
  *
@@ -14,10 +16,11 @@ public interface Codec {
      * @param y topLeft position along y axis of image matrix
      * @param height block's height
      * @param width block's width
-     * @param compress to compress or not
-     * @return an array bytes
+     * @return list of array bytes
+     * at ind 0 : compressed
+     * at ind 1 : without compression
      */
-    byte[] encode(final int[][] screenShot, final int x, final int y, final int height, final int width, boolean compress);
+    List<byte[]> encode(final int[][] screenShot, final int x, final int y, final int height, final int width);
 
     /**
      * Decode and Decompress the image.

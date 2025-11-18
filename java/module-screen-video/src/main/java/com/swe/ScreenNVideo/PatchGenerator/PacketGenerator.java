@@ -1,6 +1,7 @@
 package com.swe.ScreenNVideo.PatchGenerator;
 
 import com.swe.ScreenNVideo.Codec.Codec;
+import com.swe.ScreenNVideo.Serializer.FeedPatch;
 import com.swe.ScreenNVideo.Utils;
 
 import java.util.ArrayList;
@@ -34,26 +35,28 @@ public class PacketGenerator {
     /**
      * Generate a full image patch covering the entire frame.
      * @param curr is the image frame (int[width][height][3] RGB array)
-     * @param toCompress to compress the packets ot not
      * @return list containing a single compressed patch for the full image
      */
-    public List<CompressedPatch> generateFullImage(final int[][] curr, final boolean toCompress) {
+    public FeedPatch generateFullImage(final int[][] curr) {
         final int height = curr.length;
         final int width = curr[0].length;
 
-        final byte[] compressedString = this.compressor.encode(curr, 0, 0, height, width, toCompress);
-        final List<CompressedPatch> patches = new ArrayList<>();
-        patches.add(new CompressedPatch(0, 0, width, height, compressedString));
-        return patches;
+        final List<byte[]> compressedString = this.compressor.encode(curr, 0, 0, height, width);
+        final List<CompressedPatch> compressedPatches = new ArrayList<>();
+        final List<CompressedPatch> unCompressedPatches = new ArrayList<>();
+        // add the compressed patch
+        compressedPatches.add(new CompressedPatch(0, 0, width, height, compressedString.get(0)));
+        // add uncompressed patch
+        unCompressedPatches.add(new CompressedPatch(0, 0, width, height, compressedString.get(1)));
+        return new FeedPatch(compressedPatches, unCompressedPatches);
     }
 
     /**
      * Split frames into tiles, compare hashes, compress dirty tiles.
      * @param curr is the image frame (int[width][height][3] RGB array)
-     * @param toCompress to compress the packets ot not
-     * @return list of compressed patches
+     * @return list of compressed patches,
      */
-    public List<CompressedPatch> generatePackets(final int[][] curr, final boolean toCompress) {
+    public FeedPatch generatePackets(final int[][] curr) {
         final int height = curr.length;
         final int width = curr[0].length;
 
@@ -73,7 +76,8 @@ public class PacketGenerator {
             prevHashes = newPrevHashes;
         }
 
-        final List<CompressedPatch> patches = new ArrayList<>();
+        final List<CompressedPatch> compressedPatches = new ArrayList<>();
+        final List<CompressedPatch> unCompressedPatches = new ArrayList<>();
 
         for (int ty = 0; ty < tilesY; ty++) {
             for (int tx = 0; tx < tilesX; tx++) {
@@ -84,13 +88,16 @@ public class PacketGenerator {
 
                 final long currHash = hasher.hash(curr, x, y, w, h);
                 if (currHash != prevHashes[tx][ty]) {
-                    final byte[] compressedString = this.compressor.encode(curr, x, y, h, w, toCompress);
-                    patches.add(new CompressedPatch(x, y, w, h, compressedString));
+                    final List<byte[]> compressedString = this.compressor.encode(curr, x, y, h, w);
+                    // add the compressed patch
+                    compressedPatches.add(new CompressedPatch(x, y, w, h, compressedString.get(0)));
+                    // add uncompressed patch
+                    unCompressedPatches.add(new CompressedPatch(x, y, w, h, compressedString.get(1)));
                 }
                 prevHashes[tx][ty] = currHash;
             }
         }
-        return patches;
+        return new FeedPatch(compressedPatches, unCompressedPatches);
     }
 
 }
